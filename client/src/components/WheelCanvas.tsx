@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogClose,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -137,11 +138,12 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
       />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent 
-          className="absolute w-80 p-6 cursor-move"
+          className="absolute w-80 p-6 cursor-move select-none"
           style={{ 
             left: `${dialogPosition.x}px`, 
             top: `${dialogPosition.y}px`,
-            transform: 'none'
+            transform: 'none',
+            pointerEvents: 'auto'
           }}
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) {
@@ -153,21 +155,48 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
               });
             }
           }}
+          onTouchStart={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsDragging(true);
+              const rect = e.currentTarget.getBoundingClientRect();
+              const touch = e.touches[0];
+              setDragOffset({
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+              });
+            }
+          }}
           onMouseMove={(e) => {
             if (isDragging) {
+              e.preventDefault();
               setDialogPosition({
                 x: e.clientX - dragOffset.x,
                 y: e.clientY - dragOffset.y
               });
             }
           }}
+          onTouchMove={(e) => {
+            if (isDragging) {
+              e.preventDefault();
+              const touch = e.touches[0];
+              setDialogPosition({
+                x: touch.clientX - dragOffset.x,
+                y: touch.clientY - dragOffset.y
+              });
+            }
+          }}
           onMouseUp={() => setIsDragging(false)}
+          onTouchEnd={() => setIsDragging(false)}
           onMouseLeave={() => setIsDragging(false)}
+          onTouchCancel={() => setIsDragging(false)}
         >
+          <DialogTitle className="text-lg font-semibold mb-4">
+            Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
+          </DialogTitle>
           <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
             <X className="h-4 w-4" />
           </DialogClose>
-          <div className="space-y-4 pt-2">
+          <div className={`space-y-4 pt-2 ${isDragging ? 'pointer-events-none' : ''}`}>
             <div className="space-y-2">
               <Label>Choose Color for Slice {selectedSlice !== null ? selectedSlice + 1 : ''}</Label>
               <Input
