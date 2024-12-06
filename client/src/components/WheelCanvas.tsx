@@ -130,17 +130,10 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
       
-      // Calculate wheel center position
-      const wheelCenterX = rect.left + (rect.width / 2);
-      const wheelCenterY = rect.top + (rect.height / 2);
-      
-      // Set dialog position with offset from wheel center
-      const dialogOffset = 100; // pixels from wheel center
-      const angle = Math.atan2(y - rect.height/2, x - rect.width/2);
-      setDialogPosition({
-        x: wheelCenterX + Math.cos(angle) * dialogOffset,
-        y: wheelCenterY + Math.sin(angle) * dialogOffset
-      });
+      // Initialize dialog at wheel center
+      const wheelCenterX = rect.left + rect.width / 2;
+      const wheelCenterY = rect.top + rect.height / 2;
+      setDialogPosition({ x: wheelCenterX, y: wheelCenterY });
       setDialogOpen(true);
     }
   };
@@ -211,7 +204,7 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
               e.currentTarget.setPointerCapture(e.pointerId);
             }
           }}
-          onPointerMove={useCallback((e: PointerEvent) => {
+          onPointerMove={useCallback((e: React.PointerEvent<HTMLDivElement>) => {
             if (isDragging) {
               e.preventDefault();
               if (animationFrameRef.current) {
