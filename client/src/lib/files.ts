@@ -64,6 +64,8 @@ function parseCsv(text: string): WheelConfig {
     spinDuration: parseFloat(values[headers.indexOf('spinDuration')]),
     startRamp: parseFloat(values[headers.indexOf('startRamp')]),
     endRamp: parseFloat(values[headers.indexOf('endRamp')]),
+    colorScheme: (values[headers.indexOf('colorScheme')] || 'default') as ColorScheme,
+    customColors: JSON.parse(values[headers.indexOf('customColors')] || '[]'),
   };
 }
 

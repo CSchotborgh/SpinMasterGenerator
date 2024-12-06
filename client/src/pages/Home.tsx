@@ -15,6 +15,7 @@ export interface WheelConfig {
   startRamp: number;
   endRamp: number;
   colorScheme: ColorScheme;
+  customColors: (string | null)[];
 }
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
     startRamp: 1,
     endRamp: 1,
     colorScheme: 'default',
+    customColors: Array(8).fill(null),
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
@@ -43,6 +45,7 @@ export default function Home() {
             config={config} 
             isSpinning={isSpinning}
             onSpinComplete={() => setIsSpinning(false)}
+            onConfigChange={setConfig}
           />
         </Card>
         

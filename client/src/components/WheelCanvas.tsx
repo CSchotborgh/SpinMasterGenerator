@@ -1,16 +1,27 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { WheelConfig } from "../pages/Home";
-import { renderWheel, spinWheel } from "../lib/wheel";
+import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 interface WheelCanvasProps {
   config: WheelConfig;
   isSpinning: boolean;
   onSpinComplete: () => void;
+  onConfigChange: (config: WheelConfig) => void;
 }
 
-export function WheelCanvas({ config, isSpinning, onSpinComplete }: WheelCanvasProps) {
+export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange }: WheelCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [colorPickerPosition, setColorPickerPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -55,12 +66,65 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete }: WheelCanvasP
     };
   }, [config, isSpinning, onSpinComplete]);
 
+  const handleContextMenu = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (isSpinning) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    const sliceIndex = getSliceAtPoint(x, y, config);
+    if (sliceIndex !== null) {
+      setSelectedSlice(sliceIndex);
+      setColorPickerPosition({ x: e.clientX, y: e.clientY });
+      setColorPickerOpen(true);
+    }
+  };
+
+  const handleColorChange = (color: string) => {
+    if (selectedSlice === null) return;
+    
+    const newCustomColors = [...config.customColors];
+    newCustomColors[selectedSlice] = color;
+    onConfigChange({ ...config, customColors: newCustomColors });
+    setColorPickerOpen(false);
+  };
+
   return (
-    <div className="flex justify-center items-center">
+    <div className="flex justify-center items-center relative">
       <canvas
         ref={canvasRef}
         className="max-w-full h-auto shadow-lg rounded-full"
+        onContextMenu={handleContextMenu}
       />
+      <Popover open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
+        <PopoverTrigger asChild>
+          <div 
+            style={{ 
+              position: 'fixed', 
+              left: colorPickerPosition.x, 
+              top: colorPickerPosition.y,
+              visibility: 'hidden' 
+            }} 
+          />
+        </PopoverTrigger>
+        <PopoverContent className="w-64">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Choose Color for Slice {selectedSlice !== null ? selectedSlice + 1 : ''}</Label>
+              <Input
+                type="color"
+                value={selectedSlice !== null ? (config.customColors[selectedSlice] || '#000000') : '#000000'}
+                onChange={(e) => handleColorChange(e.target.value)}
+              />
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }

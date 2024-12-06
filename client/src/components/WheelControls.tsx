@@ -19,7 +19,7 @@ interface WheelControlsProps {
 }
 
 export function WheelControls({ config, onConfigChange, onSpin, disabled }: WheelControlsProps) {
-  const updateConfig = (key: keyof WheelConfig, value: number | boolean) => {
+  const updateConfig = (key: keyof WheelConfig, value: number | boolean | string) => {
     onConfigChange({ ...config, [key]: value });
   };
 

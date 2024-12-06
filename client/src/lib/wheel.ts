@@ -6,28 +6,26 @@ export function renderWheel(
   rotation: number = 0
 ) {
   const { circumference, slices, randomSizes } = config;
-  const center = circumference / 2;
-  const radius = center - 10;
-
-  // Clear canvas
-  ctx.clearRect(0, 0, circumference, circumference);
+  const radius = (circumference - 20) / 2;
   
-  // Set up wheel transform
+  // Clear canvas and set center point
+  ctx.clearRect(0, 0, circumference, circumference);
   ctx.save();
-  ctx.translate(center, center);
+  ctx.translate(circumference / 2, circumference / 2);
   ctx.rotate(rotation);
 
-  // Generate slice sizes
+  // Calculate slice sizes
   const sliceSizes = Array(slices).fill(2 * Math.PI / slices);
   if (randomSizes) {
-    const total = sliceSizes.reduce((a, b) => a + b);
+    const total = sliceSizes.reduce((sum, size) => sum + size);
     sliceSizes.forEach((_, i) => {
-      sliceSizes[i] *= 0.5 + Math.random();
+      if (i < sliceSizes.length - 1) {
+        sliceSizes[i] *= 0.5 + Math.random();
+      }
     });
-    const newTotal = sliceSizes.reduce((a, b) => a + b);
-    sliceSizes.forEach((_, i) => {
-      sliceSizes[i] *= total / newTotal;
-    });
+    // Adjust last slice to make total 2π
+    const currentTotal = sliceSizes.slice(0, -1).reduce((sum, size) => sum + size);
+    sliceSizes[sliceSizes.length - 1] = total - currentTotal;
   }
 
   // Color schemes
@@ -52,32 +50,25 @@ export function renderWheel(
 
   // Draw slices
   let currentAngle = 0;
-  const colors = colorSchemes[config.colorScheme || 'default'];
+  const schemeColors = colorSchemes[config.colorScheme || 'default'];
 
   sliceSizes.forEach((size, i) => {
+    const customColor = config.customColors[i];
+    const color = customColor || schemeColors[i % schemeColors.length];
+    
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.arc(0, 0, radius, currentAngle, currentAngle + size);
     ctx.closePath();
     
     // Fill slice
-    ctx.fillStyle = colors[i % colors.length];
+    ctx.fillStyle = color;
     ctx.fill();
     
     // Draw border
-    ctx.strokeStyle = '#ffffff';
+    ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
     ctx.stroke();
-
-    // Add number
-    ctx.save();
-    ctx.rotate(currentAngle + size / 2);
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 20px sans-serif';
-    ctx.fillText((i + 1).toString(), radius * 0.75, 0);
-    ctx.restore();
 
     currentAngle += size;
   });
@@ -85,13 +76,41 @@ export function renderWheel(
   // Draw center circle
   ctx.beginPath();
   ctx.arc(0, 0, 15, 0, Math.PI * 2);
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = '#333';
   ctx.fill();
-  ctx.strokeStyle = '#000000';
+  ctx.strokeStyle = '#000';
   ctx.lineWidth = 2;
   ctx.stroke();
 
   ctx.restore();
+}
+
+export function getSliceAtPoint(
+  x: number,
+  y: number,
+  config: WheelConfig
+): number | null {
+  const { circumference, slices } = config;
+  const center = circumference / 2;
+  const radius = center - 10;
+
+  // Convert click coordinates to be relative to wheel center
+  const relativeX = x - center;
+  const relativeY = y - center;
+
+  // Calculate distance from center
+  const distance = Math.sqrt(relativeX * relativeX + relativeY * relativeY);
+  if (distance > radius || distance < 15) return null;
+
+  // Calculate angle
+  let angle = Math.atan2(relativeY, relativeX);
+  if (angle < 0) angle += 2 * Math.PI;
+
+  // Convert angle to slice index
+  const sliceSize = (2 * Math.PI) / slices;
+  const sliceIndex = Math.floor(angle / sliceSize);
+  
+  return sliceIndex;
 }
 
 export function spinWheel(elapsed: number, config: WheelConfig): number {
