@@ -27,6 +27,9 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
   const animationRef = useRef<number>();
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -85,9 +88,48 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     const sliceIndex = getSliceAtPoint(x, y, config);
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
+      setDialogPosition({ x: e.clientX, y: e.clientY });
       setDialogOpen(true);
     }
   };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isDragging) {
+        const x = e.clientX - dragOffset.x;
+        const y = e.clientY - dragOffset.y;
+        
+        // Keep dialog within viewport bounds
+        const dialog = document.querySelector('[role="dialog"]');
+        if (dialog) {
+          const bounds = dialog.getBoundingClientRect();
+          const maxX = window.innerWidth - bounds.width / 2;
+          const maxY = window.innerHeight - bounds.height / 2;
+          const minX = bounds.width / 2;
+          const minY = bounds.height / 2;
+
+          setDialogPosition({
+            x: Math.min(Math.max(x, minX), maxX),
+            y: Math.min(Math.max(y, minY), maxY)
+          });
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, dragOffset]);
 
   const handleColorChange = (color: string) => {
     if (selectedSlice === null) return;
@@ -138,12 +180,30 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
         onOpenChange={setDialogOpen}
       >
         <DialogContent 
-          className="fixed right-0 top-0 h-screen w-[320px] overflow-y-auto p-6 animate-slide-in bg-white"
+          className="absolute overflow-y-auto p-6 bg-white rounded-lg"
           style={{ 
-            boxShadow: '-4px 0 6px -1px rgba(0,0,0,0.1)'
+            width: '320px',
+            maxHeight: '80vh',
+            top: `${dialogPosition.y}px`,
+            left: `${dialogPosition.x}px`,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+            cursor: isDragging ? 'grabbing' : 'grab',
+            userSelect: 'none',
+            zIndex: 50,
+            transform: 'translate(-50%, -50%)'
+          }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.dialog-header')) {
+              setIsDragging(true);
+              const bounds = e.currentTarget.getBoundingClientRect();
+              setDragOffset({
+                x: e.clientX - bounds.left,
+                y: e.clientY - bounds.top
+              });
+            }
           }}
         >
-          <DialogTitle className="text-lg font-semibold">
+          <DialogTitle className="text-lg font-semibold dialog-header cursor-grab active:cursor-grabbing">
             Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground mb-4">
