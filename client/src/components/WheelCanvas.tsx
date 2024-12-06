@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import type { WheelConfig } from "../pages/Home";
 import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
 import {
@@ -138,13 +138,14 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
       />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent 
-          className="absolute w-80 p-6 cursor-move select-none"
+          className="absolute w-80 p-6 cursor-move select-none touch-none"
           style={{ 
-            left: `${dialogPosition.x}px`, 
-            top: `${dialogPosition.y}px`,
-            transform: 'none'
+            transform: `translate3d(${dialogPosition.x}px, ${dialogPosition.y}px, 0)`,
+            willChange: 'transform',
+            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
+            touchAction: 'none'
           }}
-          onMouseDown={(e) => {
+          onMouseDown={useCallback((e: React.MouseEvent) => {
             if (e.target === e.currentTarget) {
               setIsDragging(true);
               const rect = e.currentTarget.getBoundingClientRect();
@@ -153,17 +154,19 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                 y: e.clientY - rect.top
               });
             }
-          }}
-          onMouseMove={(e) => {
+          }, [])}
+          onMouseMove={useCallback((e: React.MouseEvent) => {
             if (isDragging) {
-              setDialogPosition({
-                x: e.clientX - dragOffset.x,
-                y: e.clientY - dragOffset.y
+              requestAnimationFrame(() => {
+                setDialogPosition({
+                  x: e.clientX - dragOffset.x,
+                  y: e.clientY - dragOffset.y
+                });
               });
             }
-          }}
-          onMouseUp={() => setIsDragging(false)}
-          onMouseLeave={() => setIsDragging(false)}
+          }, [isDragging, dragOffset])}
+          onMouseUp={useCallback(() => setIsDragging(false), [])}
+          onMouseLeave={useCallback(() => setIsDragging(false), [])}
         >
           <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
             <X className="h-4 w-4" />
