@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogClose,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -87,7 +88,18 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     const sliceIndex = getSliceAtPoint(x, y, config);
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
-      setDialogPosition({ x: e.clientX, y: e.clientY });
+      
+      // Get viewport dimensions
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      // Calculate safe position
+      const dialogWidth = 320; // w-80 = 320px
+      const dialogHeight = 400; // Approximate height
+      const safeX = Math.min(Math.max(0, e.clientX), viewportWidth - dialogWidth);
+      const safeY = Math.min(Math.max(0, e.clientY), viewportHeight - dialogHeight);
+      
+      setDialogPosition({ x: safeX, y: safeY });
       setDialogOpen(true);
     }
   };
@@ -158,9 +170,23 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
           onMouseMove={useCallback((e: React.MouseEvent) => {
             if (isDragging) {
               requestAnimationFrame(() => {
+                // Get viewport dimensions
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Calculate new position
+                const newX = e.clientX - dragOffset.x;
+                const newY = e.clientY - dragOffset.y;
+                
+                // Apply boundary constraints
+                const dialogWidth = 320;
+                const dialogHeight = 400;
+                const constrainedX = Math.min(Math.max(0, newX), viewportWidth - dialogWidth);
+                const constrainedY = Math.min(Math.max(0, newY), viewportHeight - dialogHeight);
+                
                 setDialogPosition({
-                  x: e.clientX - dragOffset.x,
-                  y: e.clientY - dragOffset.y
+                  x: constrainedX,
+                  y: constrainedY
                 });
               });
             }
@@ -174,6 +200,9 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
           <DialogTitle className="text-lg font-semibold">
             Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Configure wheel slice settings including color, label, and text options
+          </DialogDescription>
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
               <Label>Choose Color for Slice {selectedSlice !== null ? selectedSlice + 1 : ''}</Label>
