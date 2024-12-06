@@ -1,4 +1,4 @@
-import type { WheelConfig } from "../pages/Home";
+import type { WheelConfig, ColorScheme } from "../pages/Home";
 
 export async function importConfig(file: File): Promise<WheelConfig> {
   const text = await file.text();

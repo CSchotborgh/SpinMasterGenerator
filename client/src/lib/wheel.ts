@@ -70,6 +70,35 @@ export function renderWheel(
     ctx.lineWidth = 2;
     ctx.stroke();
 
+    // Draw slice label
+    const label = config.sliceLabels[i] || '';
+    if (label) {
+      // Save context for text rotation
+      ctx.save();
+      
+      // Move to center of slice
+      const labelRadius = radius * 0.75;
+      const labelAngle = currentAngle + (size / 2);
+      const x = labelRadius * Math.cos(labelAngle);
+      const y = labelRadius * Math.sin(labelAngle);
+      
+      // Rotate and position text
+      ctx.translate(x, y);
+      ctx.rotate(labelAngle + Math.PI / 2);
+      
+      // Set text properties
+      ctx.fillStyle = '#000000';
+      ctx.font = '16px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      
+      // Draw text
+      ctx.fillText(label, 0, 0);
+      
+      // Restore context
+      ctx.restore();
+    }
+
     currentAngle += size;
   });
 

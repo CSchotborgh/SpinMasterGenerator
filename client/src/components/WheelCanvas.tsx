@@ -91,7 +91,14 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     const newCustomColors = [...config.customColors];
     newCustomColors[selectedSlice] = color;
     onConfigChange({ ...config, customColors: newCustomColors });
-    setColorPickerOpen(false);
+  };
+
+  const handleLabelChange = (label: string) => {
+    if (selectedSlice === null) return;
+    
+    const newSliceLabels = [...config.sliceLabels];
+    newSliceLabels[selectedSlice] = label;
+    onConfigChange({ ...config, sliceLabels: newSliceLabels });
   };
 
   return (
@@ -120,6 +127,15 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                 type="color"
                 value={selectedSlice !== null ? (config.customColors[selectedSlice] || '#000000') : '#000000'}
                 onChange={(e) => handleColorChange(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Slice Label</Label>
+              <Input
+                type="text"
+                value={selectedSlice !== null ? config.sliceLabels[selectedSlice] : ''}
+                onChange={(e) => handleLabelChange(e.target.value)}
+                placeholder="Enter slice label"
               />
             </div>
           </div>
