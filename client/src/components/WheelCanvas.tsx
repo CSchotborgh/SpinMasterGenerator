@@ -27,9 +27,6 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
   const animationRef = useRef<number>();
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -88,7 +85,6 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     const sliceIndex = getSliceAtPoint(x, y, config);
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
-      setDialogPosition({ x: e.clientX, y: e.clientY });
       setDialogOpen(true);
     }
   };
@@ -142,10 +138,8 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
         onOpenChange={setDialogOpen}
       >
         <DialogContent 
-          className="fixed right-0 top-0 h-screen w-[320px] overflow-y-auto p-6 animate-slide-in"
+          className="fixed right-0 top-0 h-screen w-[320px] overflow-y-auto p-6 animate-slide-in bg-white"
           style={{ 
-            transform: 'none',
-            backgroundColor: 'white',
             boxShadow: '-4px 0 6px -1px rgba(0,0,0,0.1)'
           }}
         >
