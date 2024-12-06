@@ -129,7 +129,18 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     const sliceIndex = getSliceAtPoint(x, y, config);
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
-      setDialogPosition({ x: e.clientX, y: e.clientY });
+      
+      // Calculate wheel center position
+      const wheelCenterX = rect.left + (rect.width / 2);
+      const wheelCenterY = rect.top + (rect.height / 2);
+      
+      // Set dialog position with offset from wheel center
+      const dialogOffset = 100; // pixels from wheel center
+      const angle = Math.atan2(y - rect.height/2, x - rect.width/2);
+      setDialogPosition({
+        x: wheelCenterX + Math.cos(angle) * dialogOffset,
+        y: wheelCenterY + Math.sin(angle) * dialogOffset
+      });
       setDialogOpen(true);
     }
   };
@@ -185,7 +196,8 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
           style={{ 
             transform: `translate3d(${dialogPosition.x}px, ${dialogPosition.y}px, 0)`,
             willChange: 'transform',
-            touchAction: 'none'
+            touchAction: 'none',
+            transition: isDragging ? 'none' : 'transform 0.2s ease-out'
           }}
           aria-describedby="slice-settings-description"
           onPointerDown={(e) => {
@@ -199,7 +211,7 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
               e.currentTarget.setPointerCapture(e.pointerId);
             }
           }}
-          onPointerMove={useCallback((e) => {
+          onPointerMove={useCallback((e: PointerEvent) => {
             if (isDragging) {
               e.preventDefault();
               if (animationFrameRef.current) {
