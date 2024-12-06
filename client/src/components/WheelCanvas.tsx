@@ -3,6 +3,21 @@ import GIF from 'gif.js';
 import type { WheelConfig } from "../pages/Home";
 import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
 import { useToast } from "@/hooks/use-toast";
+
+interface GifOptions {
+  workers: number;
+  quality: number;
+  width: number;
+  height: number;
+  workerScript: string;
+}
+
+interface GifEvents {
+  finished: (blob: Blob, data: Uint8Array) => void;
+  progress: (percent: number) => void;
+  error: (error: Error) => void;
+  abort: () => void;
+}
 import {
   Dialog,
   DialogContent,
@@ -37,7 +52,7 @@ export function WheelCanvas({
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
-  const gifRef = useRef<GIF>();
+  const gifRef = useRef<GIF<GifOptions>>();
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -76,7 +91,7 @@ export function WheelCanvas({
           duration: 3000,
         });
 
-        gifRef.current = new GIF({
+        gifRef.current = new GIF<GifOptions>({
           workers: 2,
           quality: 10,
           width: canvas.width,
@@ -84,11 +99,11 @@ export function WheelCanvas({
           workerScript: '/gif.worker.js'
         });
 
-        gifRef.current.on('progress', (p) => {
-          setRecordingProgress(Math.round(p * 100));
+        gifRef.current.on('progress', (percent: number) => {
+          setRecordingProgress(Math.round(percent * 100));
         });
 
-        gifRef.current.on('finished', (blob: Blob) => {
+        gifRef.current.on('finished', (blob: Blob, data: Uint8Array) => {
           toast({
             title: "Recording Complete",
             description: "Your animation has been saved to downloads",
@@ -98,14 +113,14 @@ export function WheelCanvas({
           gifRef.current?.abort(); // Clean up
         });
 
-        gifRef.current.on('error', (err) => {
+        gifRef.current.on('error', (error: Error) => {
           toast({
             title: "Recording Error",
             description: "Failed to generate animation. Please try again.",
             variant: "destructive",
             duration: 5000,
           });
-          console.error('GIF generation error:', err);
+          console.error('GIF generation error:', error);
         });
       }
 
