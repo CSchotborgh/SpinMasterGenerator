@@ -161,7 +161,9 @@ export function renderWheel(
           // Slight rotation adjustment based on position in arc
           const charRotation = Math.atan2(x, currentRadius) * 0.5;
           ctx.rotate(charRotation);
-          ctx.fillText(char, 0, 0);
+          // Apply kerning to character positioning
+          const kerning = config.textKerning[i];
+          ctx.fillText(char, kerning * fontSize / 2, 0);
           ctx.restore();
         });
       } else {
@@ -171,6 +173,9 @@ export function renderWheel(
         // Truncate horizontal text if too wide
         const maxWidth = labelRadius * 0.8;
         let displayText = label;
+        const kerningValue = config.textKerning[i];
+        const letterSpacingValue = kerningValue * baseFontSize / 4;
+        ctx.letterSpacing = `${letterSpacingValue}px`;
         let textWidth = ctx.measureText(displayText).width;
         
         while (textWidth > maxWidth && displayText.length > 1) {

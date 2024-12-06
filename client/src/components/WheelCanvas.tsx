@@ -258,6 +258,27 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                   className="py-2"
                 />
               </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Letter Spacing</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {selectedSlice !== null ? `${config.textKerning[selectedSlice]}` : '0'}
+                  </span>
+                </div>
+                <Slider
+                  value={[selectedSlice !== null ? config.textKerning[selectedSlice] : 0]}
+                  onValueChange={([value]) => {
+                    if (selectedSlice === null) return;
+                    const newTextKerning = [...config.textKerning];
+                    newTextKerning[selectedSlice] = value;
+                    onConfigChange({ ...config, textKerning: newTextKerning });
+                  }}
+                  min={-2}
+                  max={5}
+                  step={0.1}
+                  className="py-2"
+                />
+              </div>
             </div>
           </div>
         </PopoverContent>
