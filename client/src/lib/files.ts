@@ -1,0 +1,104 @@
+import type { WheelConfig } from "../pages/Home";
+
+export async function importConfig(file: File): Promise<WheelConfig> {
+  const text = await file.text();
+  const extension = file.name.split('.').pop()?.toLowerCase();
+
+  switch (extension) {
+    case 'csv':
+      return parseCsv(text);
+    case 'txt':
+      return parseTxt(text);
+    case 'xls':
+    case 'xlsx':
+      return parseXls(text);
+    default:
+      throw new Error('Unsupported file format');
+  }
+}
+
+export async function exportConfig(config: WheelConfig, format: 'csv' | 'txt' | 'xls') {
+  let content: string;
+  let mimeType: string;
+  let extension: string;
+
+  switch (format) {
+    case 'csv':
+      content = generateCsv(config);
+      mimeType = 'text/csv';
+      extension = 'csv';
+      break;
+    case 'txt':
+      content = generateTxt(config);
+      mimeType = 'text/plain';
+      extension = 'txt';
+      break;
+    case 'xls':
+      content = generateXls(config);
+      mimeType = 'application/vnd.ms-excel';
+      extension = 'xls';
+      break;
+  }
+
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `wheel-config.${extension}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function parseCsv(text: string): WheelConfig {
+  const lines = text.split('\n');
+  const headers = lines[0].split(',');
+  const values = lines[1].split(',');
+  
+  return {
+    slices: parseInt(values[headers.indexOf('slices')]),
+    circumference: parseInt(values[headers.indexOf('circumference')]),
+    randomSizes: values[headers.indexOf('randomSizes')] === 'true',
+    spinSpeed: parseFloat(values[headers.indexOf('spinSpeed')]),
+    spinDuration: parseFloat(values[headers.indexOf('spinDuration')]),
+    startRamp: parseFloat(values[headers.indexOf('startRamp')]),
+    endRamp: parseFloat(values[headers.indexOf('endRamp')]),
+  };
+}
+
+function parseTxt(text: string): WheelConfig {
+  const lines = text.split('\n');
+  const config: any = {};
+  
+  lines.forEach(line => {
+    const [key, value] = line.split(':').map(s => s.trim());
+    config[key] = key === 'randomSizes' ? value === 'true' : parseFloat(value);
+  });
+
+  return config as WheelConfig;
+}
+
+function parseXls(text: string): WheelConfig {
+  // For this example, we'll parse it as CSV
+  // In a real implementation, you'd use a proper XLS parser library
+  return parseCsv(text);
+}
+
+function generateCsv(config: WheelConfig): string {
+  const headers = Object.keys(config).join(',');
+  const values = Object.values(config).join(',');
+  return `${headers}\n${values}`;
+}
+
+function generateTxt(config: WheelConfig): string {
+  return Object.entries(config)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join('\n');
+}
+
+function generateXls(config: WheelConfig): string {
+  // For this example, we'll generate CSV format
+  // In a real implementation, you'd use a proper XLS generator library
+  return generateCsv(config);
+}
