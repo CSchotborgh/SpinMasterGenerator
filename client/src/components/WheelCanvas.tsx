@@ -5,6 +5,7 @@ import {
   Dialog,
   DialogContent,
   DialogClose,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -137,7 +138,7 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
       />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent 
-          className="absolute w-80 p-6 cursor-move"
+          className="absolute w-80 p-6 cursor-move select-none"
           style={{ 
             left: `${dialogPosition.x}px`, 
             top: `${dialogPosition.y}px`,
@@ -167,6 +168,9 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
           <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
             <X className="h-4 w-4" />
           </DialogClose>
+          <DialogTitle className="text-lg font-semibold">
+            Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
+          </DialogTitle>
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
               <Label>Choose Color for Slice {selectedSlice !== null ? selectedSlice + 1 : ''}</Label>
