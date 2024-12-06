@@ -3,6 +3,7 @@ import { WheelCanvas } from "../components/WheelCanvas";
 import { WheelControls } from "../components/WheelControls";
 import { FileControls } from "../components/FileControls";
 import { TemplateControls } from "../components/TemplateControls";
+import { RecordingControls } from "../components/RecordingControls";
 import { useState } from "react";
 
 export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome' | 'sunset' | 'ocean';
@@ -49,6 +50,19 @@ export default function Home() {
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+
+  const handleRecordingComplete = (gifBlob: Blob) => {
+    setIsRecording(false);
+    const url = URL.createObjectURL(gifBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'wheel-animation.gif';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -61,8 +75,10 @@ export default function Home() {
           <WheelCanvas 
             config={config} 
             isSpinning={isSpinning}
+            isRecording={isRecording}
             onSpinComplete={() => setIsSpinning(false)}
             onConfigChange={setConfig}
+            onRecordingComplete={handleRecordingComplete}
           />
         </Card>
         
@@ -80,6 +96,15 @@ export default function Home() {
             <TemplateControls
               config={config}
               onConfigChange={setConfig}
+              disabled={isSpinning}
+            />
+          </Card>
+
+          <Card className="p-6">
+            <RecordingControls
+              isRecording={isRecording}
+              onStartRecording={() => setIsRecording(true)}
+              onStopRecording={() => setIsRecording(false)}
               disabled={isSpinning}
             />
           </Card>

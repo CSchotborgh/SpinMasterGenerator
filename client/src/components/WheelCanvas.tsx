@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import GIF from 'gif.js';
 import type { WheelConfig } from "../pages/Home";
 import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
 import {
@@ -22,7 +23,23 @@ interface WheelCanvasProps {
   onConfigChange: (config: WheelConfig) => void;
 }
 
-export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange }: WheelCanvasProps) {
+interface WheelCanvasProps {
+  config: WheelConfig;
+  isSpinning: boolean;
+  isRecording: boolean;
+  onSpinComplete: () => void;
+  onConfigChange: (config: WheelConfig) => void;
+  onRecordingComplete: (gifBlob: Blob) => void;
+}
+
+export function WheelCanvas({ 
+  config, 
+  isSpinning, 
+  isRecording,
+  onSpinComplete, 
+  onConfigChange,
+  onRecordingComplete 
+}: WheelCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
@@ -45,15 +62,46 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     // Initial render
     renderWheel(ctx, config);
 
-    // Handle spinning animation
+    // Handle spinning animation and recording
     if (isSpinning) {
       let startTime = performance.now();
       let rotation = 0;
+      let frames: ImageData[] = [];
+      let frameCount = 0;
+      const frameRate = 30; // frames per second
+      const frameInterval = 1000 / frameRate;
+      let lastFrameTime = 0;
 
       const animate = (currentTime: number) => {
         const elapsed = (currentTime - startTime) / 1000;
         
         if (elapsed >= config.spinDuration) {
+          if (isRecording) {
+            // Convert frames to GIF
+            const gif = new GIF({
+              workers: 2,
+              quality: 10,
+              width: canvas.width,
+              height: canvas.height
+            });
+
+            frames.forEach(frame => {
+              const tempCanvas = document.createElement('canvas');
+              tempCanvas.width = canvas.width;
+              tempCanvas.height = canvas.height;
+              const tempCtx = tempCanvas.getContext('2d');
+              if (tempCtx) {
+                tempCtx.putImageData(frame, 0, 0);
+                gif.addFrame(tempCanvas, { delay: frameInterval });
+              }
+            });
+
+            gif.on('finished', (blob: Blob) => {
+              onRecordingComplete(blob);
+            });
+
+            gif.render();
+          }
           onSpinComplete();
           renderWheel(ctx, config, rotation);
           return;
@@ -61,6 +109,15 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
 
         rotation = spinWheel(elapsed, config);
         renderWheel(ctx, config, rotation);
+
+        // Capture frame for recording
+        if (isRecording && currentTime - lastFrameTime >= frameInterval) {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          frames.push(imageData);
+          frameCount++;
+          lastFrameTime = currentTime;
+        }
+
         animationRef.current = requestAnimationFrame(animate);
       };
 
@@ -72,7 +129,7 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
         cancelAnimationFrame(animationRef.current);
       }
     };
-  }, [config, isSpinning, onSpinComplete]);
+  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete]);
 
   const handleContextMenu = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
