@@ -109,21 +109,27 @@ export function renderWheel(
       if (config.textVertical[i]) {
         // Calculate arc length and available space for this slice
         const arcLength = size * radius;
-        const sliceHeight = arcLength * 0.5; // Use half the arc length as max height
+        const sliceHeight = arcLength * 0.8; // Use 80% of arc length as max height
         const padding = sliceHeight * 0.1; // 10% padding
         const availableSliceHeight = sliceHeight - (padding * 2);
         
-        // Calculate proportional font size based on slice size
+        // Calculate width at different distances from center
+        const innerRadius = radius * 0.3; // Start text from 30% of radius
+        const outerRadius = radius * 0.9; // End text at 90% of radius
+        const avgWidth = size * ((innerRadius + outerRadius) / 2); // Average width for initial calculations
+        
+        // Calculate proportional font size based on both arc length and width
         const chars = label.split('');
-        const sliceProportion = size / (2 * Math.PI); // Proportion of the wheel this slice takes
-        const proportionalBase = baseFontSize * Math.sqrt(sliceProportion); // Scale base size by square root of proportion
+        const sliceProportion = size / (2 * Math.PI);
+        const proportionalBase = baseFontSize * Math.sqrt(sliceProportion);
+        const widthFactor = avgWidth / (2 * Math.PI * radius / config.slices);
         const fontSize = Math.min(
-          proportionalBase,
-          availableSliceHeight / (chars.length * 1.2)
+          proportionalBase * Math.sqrt(widthFactor),
+          availableSliceHeight / (chars.length * 1.1) // Reduce spacing factor to 1.1
         );
         
         ctx.font = `${fontSize}px Arial`;
-        const lineHeight = fontSize * 1.2;
+        const lineHeight = fontSize * 1.1; // Reduce line height for tighter spacing
         
         // Calculate maximum chars that can fit in this slice
         const maxChars = Math.floor(availableSliceHeight / lineHeight);
@@ -133,13 +139,28 @@ export function renderWheel(
         }
         
         const totalHeight = displayChars.length * lineHeight;
+        const startY = -totalHeight / 2;
         
-        // Center text vertically within the slice's available space
+        // Distribute characters along the slice's arc
         displayChars.forEach((char, index) => {
-          const yOffset = index * lineHeight - (totalHeight / 2) + (fontSize / 2);
-          // Scale the y-offset based on slice size
-          const scaledYOffset = yOffset * sliceProportion;
-          ctx.fillText(char, 0, scaledYOffset);
+          // Calculate position along the arc
+          const progress = index / (displayChars.length - 1);
+          const currentRadius = innerRadius + (outerRadius - innerRadius) * progress;
+          const yOffset = startY + (index * lineHeight) + (fontSize / 2);
+          
+          // Calculate arc-adjusted position
+          const angleOffset = (yOffset / currentRadius) * sliceProportion;
+          const x = Math.sin(angleOffset) * currentRadius * 0.1; // Slight x-offset for arc effect
+          const y = yOffset * (currentRadius / radius); // Scale y-offset based on current radius
+          
+          // Draw character with arc adjustment
+          ctx.save();
+          ctx.translate(x, y);
+          // Slight rotation adjustment based on position in arc
+          const charRotation = Math.atan2(x, currentRadius) * 0.5;
+          ctx.rotate(charRotation);
+          ctx.fillText(char, 0, 0);
+          ctx.restore();
         });
       } else {
         // Set horizontal text font size
