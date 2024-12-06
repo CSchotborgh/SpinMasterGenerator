@@ -129,7 +129,8 @@ export function renderWheel(
         
         const fontFamily = config.textFontStyle[i] === 'monospace' ? 'Courier New' : 'Arial';
         ctx.font = `${fontSize}px ${fontFamily}`;
-        const lineHeight = fontSize * 1.1; // Reduce line height for tighter spacing
+        const verticalKerning = config.verticalKerning[i];
+        const lineHeight = fontSize * (1.1 + verticalKerning * 0.2); // Adjust line height based on vertical kerning
         
         // Calculate maximum chars that can fit in this slice
         const maxChars = Math.floor(availableSliceHeight / lineHeight);

@@ -74,6 +74,7 @@ function parseCsv(text: string): WheelConfig {
     fontSize: Array(slices).fill(0),
     textFontStyle: Array(slices).fill('proportional'),
     textKerning: Array(slices).fill(0),
+    verticalKerning: Array(slices).fill(0),
   };
 }
 

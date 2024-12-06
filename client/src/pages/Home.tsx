@@ -23,6 +23,7 @@ export interface WheelConfig {
   fontSize: number[];
   textFontStyle: ('proportional' | 'monospace')[];
   textKerning: number[];
+  verticalKerning: number[];
 }
 
 export default function Home() {
@@ -43,6 +44,7 @@ export default function Home() {
     fontSize: Array(8).fill(0), // 0 means auto-calculated based on wheel size
     textFontStyle: Array(8).fill('proportional'), // Default to proportional font
     textKerning: Array(8).fill(0), // Default kerning value
+    verticalKerning: Array(8).fill(0), // Default vertical kerning value
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
