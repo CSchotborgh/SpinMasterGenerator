@@ -136,14 +136,20 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
         className="max-w-full h-auto shadow-lg rounded-full"
         onContextMenu={handleContextMenu}
       />
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog 
+        open={dialogOpen} 
+        onOpenChange={setDialogOpen}
+        className="pointer-events-none"
+      >
         <DialogContent 
-          className="absolute w-80 p-6 cursor-move select-none"
+          className="absolute w-80 p-6 cursor-move select-none pointer-events-auto"
           style={{ 
             left: `${dialogPosition.x}px`, 
             top: `${dialogPosition.y}px`,
             transform: 'none',
-            pointerEvents: 'auto'
+            backgroundColor: 'white',
+            border: '1px solid rgba(0,0,0,0.1)',
+            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)'
           }}
           onMouseDown={(e) => {
             if (e.target === e.currentTarget) {
