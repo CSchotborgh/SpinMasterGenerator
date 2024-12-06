@@ -2,15 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import type { WheelConfig } from "../pages/Home";
 import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Dialog,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
+import { X } from "lucide-react";
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -23,8 +24,10 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
-  const [colorPickerOpen, setColorPickerOpen] = useState(false);
-  const [colorPickerPosition, setColorPickerPosition] = useState({ x: 0, y: 0 });
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -83,8 +86,8 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     const sliceIndex = getSliceAtPoint(x, y, config);
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
-      setColorPickerPosition({ x: e.clientX, y: e.clientY });
-      setColorPickerOpen(true);
+      setDialogPosition({ x: e.clientX, y: e.clientY });
+      setDialogOpen(true);
     }
   };
 
@@ -132,19 +135,39 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
         className="max-w-full h-auto shadow-lg rounded-full"
         onContextMenu={handleContextMenu}
       />
-      <Popover open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
-        <PopoverTrigger asChild>
-          <div 
-            style={{ 
-              position: 'fixed', 
-              left: colorPickerPosition.x, 
-              top: colorPickerPosition.y,
-              visibility: 'hidden' 
-            }} 
-          />
-        </PopoverTrigger>
-        <PopoverContent className="w-64">
-          <div className="space-y-4">
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent 
+          className="absolute w-80 p-6 cursor-move"
+          style={{ 
+            left: `${dialogPosition.x}px`, 
+            top: `${dialogPosition.y}px`,
+            transform: 'none'
+          }}
+          onMouseDown={(e) => {
+            if (e.target === e.currentTarget) {
+              setIsDragging(true);
+              const rect = e.currentTarget.getBoundingClientRect();
+              setDragOffset({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+              });
+            }
+          }}
+          onMouseMove={(e) => {
+            if (isDragging) {
+              setDialogPosition({
+                x: e.clientX - dragOffset.x,
+                y: e.clientY - dragOffset.y
+              });
+            }
+          }}
+          onMouseUp={() => setIsDragging(false)}
+          onMouseLeave={() => setIsDragging(false)}
+        >
+          <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
+            <X className="h-4 w-4" />
+          </DialogClose>
+          <div className="space-y-4 pt-2">
             <div className="space-y-2">
               <Label>Choose Color for Slice {selectedSlice !== null ? selectedSlice + 1 : ''}</Label>
               <Input
@@ -284,8 +307,8 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
               )}
             </div>
           </div>
-        </PopoverContent>
-      </Popover>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
