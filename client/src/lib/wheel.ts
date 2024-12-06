@@ -14,18 +14,25 @@ export function renderWheel(
   ctx.translate(circumference / 2, circumference / 2);
   ctx.rotate(rotation);
 
-  // Calculate slice sizes
-  const sliceSizes = Array(slices).fill(2 * Math.PI / slices);
-  if (randomSizes) {
-    const total = sliceSizes.reduce((sum, size) => sum + size);
-    sliceSizes.forEach((_, i) => {
-      if (i < sliceSizes.length - 1) {
-        sliceSizes[i] *= 0.5 + Math.random();
-      }
-    });
-    // Adjust last slice to make total 2π
-    const currentTotal = sliceSizes.slice(0, -1).reduce((sum, size) => sum + size);
-    sliceSizes[sliceSizes.length - 1] = total - currentTotal;
+  // Use stored slice sizes or calculate new ones if needed
+  let sliceSizes = [...config.sliceSizes];
+  
+  // Recalculate sizes only if the number of slices changed or sizes array is empty
+  if (sliceSizes.length !== slices) {
+    sliceSizes = Array(slices).fill(2 * Math.PI / slices);
+    if (randomSizes) {
+      const total = 2 * Math.PI;
+      sliceSizes.forEach((_, i) => {
+        if (i < sliceSizes.length - 1) {
+          sliceSizes[i] *= 0.5 + Math.random();
+        }
+      });
+      // Adjust last slice to make total 2π
+      const currentTotal = sliceSizes.slice(0, -1).reduce((sum, size) => sum + size);
+      sliceSizes[sliceSizes.length - 1] = total - currentTotal;
+    }
+    // Update the config with new slice sizes
+    config.sliceSizes = sliceSizes;
   }
 
   // Color schemes

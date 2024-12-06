@@ -101,7 +101,12 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     
     const newSliceLabels = [...config.sliceLabels];
     newSliceLabels[selectedSlice] = label;
-    onConfigChange({ ...config, sliceLabels: newSliceLabels });
+    // Preserve current slice sizes when updating label
+    onConfigChange({
+      ...config,
+      sliceLabels: newSliceLabels,
+      sliceSizes: [...config.sliceSizes]
+    });
   };
 
   const handleTextRotation = (degree: number) => {
