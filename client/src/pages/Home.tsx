@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { WheelCanvas } from "../components/WheelCanvas";
 import { WheelControls } from "../components/WheelControls";
 import { FileControls } from "../components/FileControls";
+import { TemplateControls } from "../components/TemplateControls";
 import { useState } from "react";
 
 export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome' | 'sunset' | 'ocean';
@@ -75,6 +76,14 @@ export default function Home() {
             />
           </Card>
           
+          <Card className="p-6">
+            <TemplateControls
+              config={config}
+              onConfigChange={setConfig}
+              disabled={isSpinning}
+            />
+          </Card>
+
           <Card className="p-6">
             <FileControls
               config={config}
