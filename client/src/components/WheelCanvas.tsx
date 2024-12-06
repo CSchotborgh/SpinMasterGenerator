@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import GIF from 'gif.js';
 import type { WheelConfig } from "../pages/Home";
 import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
+import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
@@ -33,9 +34,11 @@ export function WheelCanvas({
   onConfigChange,
   onRecordingComplete 
 }: WheelCanvasProps) {
+  const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
   const gifRef = useRef<GIF>();
+  const [recordingProgress, setRecordingProgress] = useState(0);
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
@@ -67,6 +70,12 @@ export function WheelCanvas({
 
       // Initialize GIF.js if recording
       if (isRecording) {
+        toast({
+          title: "Recording Started",
+          description: "Recording wheel animation...",
+          duration: 3000,
+        });
+
         gifRef.current = new GIF({
           workers: 2,
           quality: 10,
@@ -75,9 +84,28 @@ export function WheelCanvas({
           workerScript: '/gif.worker.js'
         });
 
+        gifRef.current.on('progress', (p) => {
+          setRecordingProgress(Math.round(p * 100));
+        });
+
         gifRef.current.on('finished', (blob: Blob) => {
+          toast({
+            title: "Recording Complete",
+            description: "Your animation has been saved to downloads",
+            duration: 5000,
+          });
           onRecordingComplete(blob);
           gifRef.current?.abort(); // Clean up
+        });
+
+        gifRef.current.on('error', (err) => {
+          toast({
+            title: "Recording Error",
+            description: "Failed to generate animation. Please try again.",
+            variant: "destructive",
+            duration: 5000,
+          });
+          console.error('GIF generation error:', err);
         });
       }
 
@@ -86,23 +114,35 @@ export function WheelCanvas({
         
         if (elapsed >= config.spinDuration) {
           if (isRecording && gifRef.current && frames.length > 0) {
-            // Add all captured frames to GIF
-            frames.forEach(frame => {
-              const tempCanvas = document.createElement('canvas');
-              tempCanvas.width = canvas.width;
-              tempCanvas.height = canvas.height;
-              const tempCtx = tempCanvas.getContext('2d');
-              if (tempCtx) {
-                tempCtx.putImageData(frame, 0, 0);
-                gifRef.current?.addFrame(tempCanvas, { delay: frameInterval });
-              }
+            toast({
+              title: "Processing Recording",
+              description: "Generating GIF animation...",
+              duration: 3000,
             });
 
-            // Render the GIF
             try {
+              // Add all captured frames to GIF
+              frames.forEach(frame => {
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                if (tempCtx) {
+                  tempCtx.putImageData(frame, 0, 0);
+                  gifRef.current?.addFrame(tempCanvas, { delay: frameInterval });
+                }
+              });
+
+              // Render the GIF
               gifRef.current.render();
             } catch (error) {
-              console.error('Error rendering GIF:', error);
+              toast({
+                title: "Recording Error",
+                description: "Failed to process animation frames. Please try again.",
+                variant: "destructive",
+                duration: 5000,
+              });
+              console.error('Error processing frames:', error);
             }
           }
           onSpinComplete();
@@ -134,7 +174,7 @@ export function WheelCanvas({
         gifRef.current.abort();
       }
     };
-  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete]);
+  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast]);
 
   const handleContextMenu = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
@@ -234,6 +274,11 @@ export function WheelCanvas({
         className="max-w-full h-auto shadow-lg rounded-full"
         onContextMenu={handleContextMenu}
       />
+      {isRecording && recordingProgress > 0 && (
+        <div className="absolute top-4 right-4 bg-black/80 text-white px-4 py-2 rounded-md">
+          Recording: {recordingProgress}%
+        </div>
+      )}
       <Dialog 
         open={dialogOpen} 
         onOpenChange={setDialogOpen}
