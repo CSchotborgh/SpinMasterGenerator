@@ -4,7 +4,7 @@ import { WheelControls } from "../components/WheelControls";
 import { FileControls } from "../components/FileControls";
 import { useState } from "react";
 
-export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome';
+export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome' | 'sunset' | 'ocean';
 
 export interface WheelConfig {
   slices: number;

@@ -124,6 +124,8 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled }: Whee
               <SelectItem value="pastel">Pastel</SelectItem>
               <SelectItem value="neon">Neon</SelectItem>
               <SelectItem value="monochrome">Monochrome</SelectItem>
+              <SelectItem value="sunset">Sunset</SelectItem>
+              <SelectItem value="ocean">Ocean</SelectItem>
             </SelectContent>
           </Select>
         </div>

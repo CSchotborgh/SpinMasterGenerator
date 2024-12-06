@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogClose,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -139,70 +140,25 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
       <Dialog 
         open={dialogOpen} 
         onOpenChange={setDialogOpen}
-        className="pointer-events-none"
       >
         <DialogContent 
-          className="absolute w-80 p-6 cursor-move select-none pointer-events-auto"
+          className="fixed right-0 top-0 h-screen w-[320px] overflow-y-auto p-6 animate-slide-in"
           style={{ 
-            left: `${dialogPosition.x}px`, 
-            top: `${dialogPosition.y}px`,
             transform: 'none',
             backgroundColor: 'white',
-            border: '1px solid rgba(0,0,0,0.1)',
-            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)'
+            boxShadow: '-4px 0 6px -1px rgba(0,0,0,0.1)'
           }}
-          onMouseDown={(e) => {
-            if (e.target === e.currentTarget) {
-              setIsDragging(true);
-              const rect = e.currentTarget.getBoundingClientRect();
-              setDragOffset({
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top
-              });
-            }
-          }}
-          onTouchStart={(e) => {
-            if (e.target === e.currentTarget) {
-              setIsDragging(true);
-              const rect = e.currentTarget.getBoundingClientRect();
-              const touch = e.touches[0];
-              setDragOffset({
-                x: touch.clientX - rect.left,
-                y: touch.clientY - rect.top
-              });
-            }
-          }}
-          onMouseMove={(e) => {
-            if (isDragging) {
-              e.preventDefault();
-              setDialogPosition({
-                x: e.clientX - dragOffset.x,
-                y: e.clientY - dragOffset.y
-              });
-            }
-          }}
-          onTouchMove={(e) => {
-            if (isDragging) {
-              e.preventDefault();
-              const touch = e.touches[0];
-              setDialogPosition({
-                x: touch.clientX - dragOffset.x,
-                y: touch.clientY - dragOffset.y
-              });
-            }
-          }}
-          onMouseUp={() => setIsDragging(false)}
-          onTouchEnd={() => setIsDragging(false)}
-          onMouseLeave={() => setIsDragging(false)}
-          onTouchCancel={() => setIsDragging(false)}
         >
-          <DialogTitle className="text-lg font-semibold mb-4">
+          <DialogTitle className="text-lg font-semibold">
             Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
           </DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground mb-4">
+            Customize the appearance and text of this wheel slice.
+          </DialogDescription>
           <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
             <X className="h-4 w-4" />
           </DialogClose>
-          <div className={`space-y-4 pt-2 ${isDragging ? 'pointer-events-none' : ''}`}>
+          <div className="space-y-4 pt-2">
             <div className="space-y-2">
               <Label>Choose Color for Slice {selectedSlice !== null ? selectedSlice + 1 : ''}</Label>
               <Input

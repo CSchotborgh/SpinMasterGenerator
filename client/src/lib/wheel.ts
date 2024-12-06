@@ -39,19 +39,33 @@ export function renderWheel(
   const colorSchemes = {
     default: [
       '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
-      '#FFEEAD', '#D4A5A5', '#9B59B6', '#3498DB'
+      '#FFEEAD', '#D4A5A5', '#9B59B6', '#3498DB',
+      '#FF9F43', '#58B19F', '#2C3E50', '#E056FD'
     ],
     pastel: [
       '#FFB3BA', '#BAFFC9', '#BAE1FF', '#FFFFBA',
-      '#FFB3F7', '#B3FFEC', '#B3D9FF', '#FFC9B3'
+      '#FFB3F7', '#B3FFEC', '#B3D9FF', '#FFC9B3',
+      '#FFE4E1', '#D4F0F0', '#CCE2CB', '#B6CFB6'
     ],
     neon: [
       '#FF1177', '#00FF66', '#00FFFF', '#FFE600',
-      '#FF00FF', '#00FFC4', '#0066FF', '#FF8800'
+      '#FF00FF', '#00FFC4', '#0066FF', '#FF8800',
+      '#39FF14', '#FF2D95', '#08F7FE', '#FFF01F'
     ],
     monochrome: [
       '#2B2B2B', '#404040', '#555555', '#6B6B6B',
-      '#808080', '#959595', '#AAAAAA', '#BFBFBF'
+      '#808080', '#959595', '#AAAAAA', '#BFBFBF',
+      '#D3D3D3', '#E8E8E8', '#F5F5F5', '#FFFFFF'
+    ],
+    sunset: [
+      '#FF7B89', '#FF9776', '#FFB461', '#FFD447',
+      '#8A5082', '#6F5F90', '#758EB7', '#A5CAD2',
+      '#FF5E78', '#FF8C42', '#FFA62B', '#FFD700'
+    ],
+    ocean: [
+      '#01295F', '#437F97', '#849324', '#FFB30F',
+      '#005B96', '#7BC4C4', '#BCD39C', '#FFFCE8',
+      '#1B4965', '#62B6CB', '#5FA8D3', '#CAE9FF'
     ]
   };
 
