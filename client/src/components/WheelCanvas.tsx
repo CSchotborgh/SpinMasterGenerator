@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import { debounce } from "../lib/utils";
+// Remove unused import
 import type { WheelConfig } from "../pages/Home";
 import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
 import {
@@ -7,6 +7,7 @@ import {
   DialogContent,
   DialogClose,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -31,6 +32,36 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
   const [isDragging, setIsDragging] = useState(false);
   const dragOffset = useRef({ x: 0, y: 0 });
   const animationFrameRef = useRef<number>();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Handle dialog positioning and viewport constraints
+  useEffect(() => {
+    if (dialogOpen) {
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const padding = 20; // Minimum distance from viewport edges
+      
+      // Get dialog dimensions
+      const dialogRect = dialogRef.current?.getBoundingClientRect();
+      if (!dialogRect) return;
+
+      // Constrain position within viewport
+      const x = Math.min(
+        Math.max(padding, dialogPosition.x),
+        viewportWidth - dialogRect.width - padding
+      );
+      const y = Math.min(
+        Math.max(padding, dialogPosition.y),
+        viewportHeight - dialogRect.height - padding
+      );
+
+      setDialogPosition({ x, y });
+    } else {
+      // Reset state when dialog closes
+      setIsDragging(false);
+      setDialogPosition({ x: 0, y: 0 });
+    }
+  }, [dialogOpen]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -149,12 +180,14 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
       />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent 
+          ref={dialogRef}
           className="absolute w-80 p-6 cursor-move select-none"
           style={{ 
             transform: `translate3d(${dialogPosition.x}px, ${dialogPosition.y}px, 0)`,
             willChange: 'transform',
             touchAction: 'none'
           }}
+          aria-describedby="slice-settings-description"
           onPointerDown={(e) => {
             if (e.target === e.currentTarget) {
               setIsDragging(true);
@@ -197,9 +230,12 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
             }
           }}
         >
-          <DialogTitle className="text-lg font-semibold mb-4">
+          <DialogTitle className="text-lg font-semibold mb-2">
             Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
           </DialogTitle>
+          <DialogDescription id="slice-settings-description" className="mb-4">
+            Customize the appearance and text of this wheel section.
+          </DialogDescription>
           <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
             <X className="h-4 w-4" />
           </DialogClose>
