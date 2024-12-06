@@ -19,13 +19,6 @@ import { X } from "lucide-react";
 interface WheelCanvasProps {
   config: WheelConfig;
   isSpinning: boolean;
-  onSpinComplete: () => void;
-  onConfigChange: (config: WheelConfig) => void;
-}
-
-interface WheelCanvasProps {
-  config: WheelConfig;
-  isSpinning: boolean;
   isRecording: boolean;
   onSpinComplete: () => void;
   onConfigChange: (config: WheelConfig) => void;
@@ -42,6 +35,7 @@ export function WheelCanvas({
 }: WheelCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
+  const gifRef = useRef<GIF>();
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
@@ -67,24 +61,32 @@ export function WheelCanvas({
       let startTime = performance.now();
       let rotation = 0;
       let frames: ImageData[] = [];
-      let frameCount = 0;
       const frameRate = 30; // frames per second
       const frameInterval = 1000 / frameRate;
       let lastFrameTime = 0;
+
+      // Initialize GIF.js if recording
+      if (isRecording) {
+        gifRef.current = new GIF({
+          workers: 2,
+          quality: 10,
+          width: canvas.width,
+          height: canvas.height,
+          workerScript: '/gif.worker.js'
+        });
+
+        gifRef.current.on('finished', (blob: Blob) => {
+          onRecordingComplete(blob);
+          gifRef.current?.abort(); // Clean up
+        });
+      }
 
       const animate = (currentTime: number) => {
         const elapsed = (currentTime - startTime) / 1000;
         
         if (elapsed >= config.spinDuration) {
-          if (isRecording) {
-            // Convert frames to GIF
-            const gif = new GIF({
-              workers: 2,
-              quality: 10,
-              width: canvas.width,
-              height: canvas.height
-            });
-
+          if (isRecording && gifRef.current && frames.length > 0) {
+            // Add all captured frames to GIF
             frames.forEach(frame => {
               const tempCanvas = document.createElement('canvas');
               tempCanvas.width = canvas.width;
@@ -92,15 +94,16 @@ export function WheelCanvas({
               const tempCtx = tempCanvas.getContext('2d');
               if (tempCtx) {
                 tempCtx.putImageData(frame, 0, 0);
-                gif.addFrame(tempCanvas, { delay: frameInterval });
+                gifRef.current?.addFrame(tempCanvas, { delay: frameInterval });
               }
             });
 
-            gif.on('finished', (blob: Blob) => {
-              onRecordingComplete(blob);
-            });
-
-            gif.render();
+            // Render the GIF
+            try {
+              gifRef.current.render();
+            } catch (error) {
+              console.error('Error rendering GIF:', error);
+            }
           }
           onSpinComplete();
           renderWheel(ctx, config, rotation);
@@ -114,7 +117,6 @@ export function WheelCanvas({
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           frames.push(imageData);
-          frameCount++;
           lastFrameTime = currentTime;
         }
 
@@ -127,6 +129,9 @@ export function WheelCanvas({
     return () => {
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
+      }
+      if (gifRef.current) {
+        gifRef.current.abort();
       }
     };
   }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete]);
@@ -160,14 +165,12 @@ export function WheelCanvas({
         const dialog = document.querySelector('[role="dialog"]');
         if (dialog) {
           const bounds = dialog.getBoundingClientRect();
-          const maxX = window.innerWidth - bounds.width / 2;
-          const maxY = window.innerHeight - bounds.height / 2;
-          const minX = bounds.width / 2;
-          const minY = bounds.height / 2;
-
+          const maxX = window.innerWidth - bounds.width;
+          const maxY = window.innerHeight - bounds.height;
+          
           setDialogPosition({
-            x: Math.min(Math.max(x, minX), maxX),
-            y: Math.min(Math.max(y, minY), maxY)
+            x: Math.min(Math.max(x, 0), maxX),
+            y: Math.min(Math.max(y, 0), maxY)
           });
         }
       }
@@ -201,7 +204,6 @@ export function WheelCanvas({
     
     const newSliceLabels = [...config.sliceLabels];
     newSliceLabels[selectedSlice] = label;
-    // Preserve current slice sizes when updating label
     onConfigChange({
       ...config,
       sliceLabels: newSliceLabels,
@@ -241,13 +243,13 @@ export function WheelCanvas({
           style={{ 
             width: '320px',
             maxHeight: '80vh',
-            top: `${dialogPosition.y}px`,
-            left: `${dialogPosition.x}px`,
+            top: dialogPosition.y,
+            left: dialogPosition.x,
+            transform: 'translate(-50%, -50%)',
             boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             cursor: isDragging ? 'grabbing' : 'grab',
             userSelect: 'none',
-            zIndex: 50,
-            transform: 'translate(-50%, -50%)'
+            zIndex: 50
           }}
           onMouseDown={(e) => {
             if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.dialog-header')) {
@@ -325,88 +327,7 @@ export function WheelCanvas({
                   />
                   <Label>Vertical Text</Label>
                 </div>
-                {selectedSlice !== null && config.textVertical[selectedSlice] && (
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      checked={selectedSlice !== null ? config.textFontStyle[selectedSlice] === 'monospace' : false}
-                      onCheckedChange={(checked) => {
-                        if (selectedSlice === null) return;
-                        const newTextFontStyle = [...config.textFontStyle];
-                        newTextFontStyle[selectedSlice] = checked ? 'monospace' : 'proportional';
-                        onConfigChange({ ...config, textFontStyle: newTextFontStyle });
-                      }}
-                    />
-                    <Label>Non-proportional Font</Label>
-                  </div>
-                )}
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label>Font Size</Label>
-                  <span className="text-sm text-muted-foreground">
-                    {selectedSlice !== null && config.fontSize[selectedSlice] ? 
-                      `${config.fontSize[selectedSlice]}px` : 'Auto'}
-                  </span>
-                </div>
-                <Slider
-                  value={[selectedSlice !== null ? config.fontSize[selectedSlice] || 12 : 12]}
-                  onValueChange={([value]) => {
-                    if (selectedSlice === null) return;
-                    const newFontSize = [...config.fontSize];
-                    newFontSize[selectedSlice] = value;
-                    onConfigChange({ ...config, fontSize: newFontSize });
-                  }}
-                  min={12}
-                  max={48}
-                  step={1}
-                  className="py-2"
-                />
-              </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label>Letter Spacing</Label>
-                  <span className="text-sm text-muted-foreground">
-                    {selectedSlice !== null ? `${config.textKerning[selectedSlice]}` : '0'}
-                  </span>
-                </div>
-                <Slider
-                  value={[selectedSlice !== null ? config.textKerning[selectedSlice] : 0]}
-                  onValueChange={([value]) => {
-                    if (selectedSlice === null) return;
-                    const newTextKerning = [...config.textKerning];
-                    newTextKerning[selectedSlice] = value;
-                    onConfigChange({ ...config, textKerning: newTextKerning });
-                  }}
-                  min={-2}
-                  max={5}
-                  step={0.1}
-                  className="py-2"
-                />
-              </div>
-              {selectedSlice !== null && config.textVertical[selectedSlice] && (
-                <div className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <Label>Vertical Spacing</Label>
-                    <span className="text-sm text-muted-foreground">
-                      {selectedSlice !== null ? `${config.verticalKerning[selectedSlice]}` : '0'}
-                    </span>
-                  </div>
-                  <Slider
-                    value={[selectedSlice !== null ? config.verticalKerning[selectedSlice] : 0]}
-                    onValueChange={([value]) => {
-                      if (selectedSlice === null) return;
-                      const newVerticalKerning = [...config.verticalKerning];
-                      newVerticalKerning[selectedSlice] = value;
-                      onConfigChange({ ...config, verticalKerning: newVerticalKerning });
-                    }}
-                    min={-2}
-                    max={5}
-                    step={0.1}
-                    className="py-2"
-                  />
-                </div>
-              )}
             </div>
           </div>
         </DialogContent>
