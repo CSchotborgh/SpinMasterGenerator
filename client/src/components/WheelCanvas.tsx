@@ -199,6 +199,49 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                 />
                 <Label>Vertical Text</Label>
               </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Text Padding</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {selectedSlice !== null ? `${config.textPadding[selectedSlice]}%` : '10%'}
+                  </span>
+                </div>
+                <Slider
+                  value={[selectedSlice !== null ? config.textPadding[selectedSlice] : 10]}
+                  onValueChange={([value]) => {
+                    if (selectedSlice === null) return;
+                    const newTextPadding = [...config.textPadding];
+                    newTextPadding[selectedSlice] = value;
+                    onConfigChange({ ...config, textPadding: newTextPadding });
+                  }}
+                  min={0}
+                  max={50}
+                  step={1}
+                  className="py-2"
+                />
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Font Size</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {selectedSlice !== null && config.fontSize[selectedSlice] ? 
+                      `${config.fontSize[selectedSlice]}px` : 'Auto'}
+                  </span>
+                </div>
+                <Slider
+                  value={[selectedSlice !== null ? config.fontSize[selectedSlice] || 12 : 12]}
+                  onValueChange={([value]) => {
+                    if (selectedSlice === null) return;
+                    const newFontSize = [...config.fontSize];
+                    newFontSize[selectedSlice] = value;
+                    onConfigChange({ ...config, fontSize: newFontSize });
+                  }}
+                  min={12}
+                  max={48}
+                  step={1}
+                  className="py-2"
+                />
+              </div>
             </div>
           </div>
         </PopoverContent>

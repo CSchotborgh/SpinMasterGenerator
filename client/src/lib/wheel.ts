@@ -110,7 +110,8 @@ export function renderWheel(
         // Calculate arc length and available space for this slice
         const arcLength = size * radius;
         const sliceHeight = arcLength * 0.8; // Use 80% of arc length as max height
-        const padding = sliceHeight * 0.1; // 10% padding
+        const paddingPercent = config.textPadding[i];
+        const padding = sliceHeight * (paddingPercent / 100);
         const availableSliceHeight = sliceHeight - (padding * 2);
         
         // Calculate width at different distances from center
@@ -123,7 +124,7 @@ export function renderWheel(
         const sliceProportion = size / (2 * Math.PI);
         const proportionalBase = baseFontSize * Math.sqrt(sliceProportion);
         const widthFactor = avgWidth / (2 * Math.PI * radius / config.slices);
-        const fontSize = Math.min(
+        const fontSize = config.fontSize[i] || Math.min(
           proportionalBase * Math.sqrt(widthFactor),
           availableSliceHeight / (chars.length * 1.1) // Reduce spacing factor to 1.1
         );

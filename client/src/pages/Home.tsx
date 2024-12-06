@@ -20,6 +20,8 @@ export interface WheelConfig {
   textRotations: number[];
   textVertical: boolean[];
   sliceSizes: number[];
+  textPadding: number[];
+  fontSize: number[];
 }
 
 export default function Home() {
@@ -37,6 +39,8 @@ export default function Home() {
     textRotations: Array(8).fill(0),
     textVertical: Array(8).fill(false),
     sliceSizes: Array(8).fill(2 * Math.PI / 8),
+    textPadding: Array(8).fill(10), // Default 10% padding
+    fontSize: Array(8).fill(0), // 0 means auto-calculated based on wheel size
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
