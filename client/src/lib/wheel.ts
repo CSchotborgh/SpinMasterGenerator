@@ -96,11 +96,20 @@ export function renderWheel(
       
       // Draw text
       if (config.textVertical[i]) {
+        // Calculate exact center point of the slice
+        const sliceCenterX = labelRadius * Math.cos(currentAngle + (size / 2));
+        const sliceCenterY = labelRadius * Math.sin(currentAngle + (size / 2));
+        
         // Draw vertical text
         const chars = label.split('');
-        const lineHeight = 16;
+        const fontSize = 16;
+        const lineHeight = fontSize * 1.2; // Add some spacing between characters
+        const totalHeight = chars.length * lineHeight;
+        
+        // Center the text vertically within the slice
         chars.forEach((char, index) => {
-          ctx.fillText(char, 0, index * lineHeight - (chars.length * lineHeight / 2));
+          const yOffset = index * lineHeight - (totalHeight / 2) + (fontSize / 2);
+          ctx.fillText(char, 0, yOffset);
         });
       } else {
         // Draw horizontal text
