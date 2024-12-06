@@ -1,12 +1,10 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { WheelConfig } from "../pages/Home";
 import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
 import {
   Dialog,
   DialogContent,
   DialogClose,
-  DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -88,18 +86,7 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     const sliceIndex = getSliceAtPoint(x, y, config);
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
-      
-      // Get viewport dimensions
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      
-      // Calculate safe position
-      const dialogWidth = 320; // w-80 = 320px
-      const dialogHeight = 400; // Approximate height
-      const safeX = Math.min(Math.max(0, e.clientX), viewportWidth - dialogWidth);
-      const safeY = Math.min(Math.max(0, e.clientY), viewportHeight - dialogHeight);
-      
-      setDialogPosition({ x: safeX, y: safeY });
+      setDialogPosition({ x: e.clientX, y: e.clientY });
       setDialogOpen(true);
     }
   };
@@ -150,14 +137,13 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
       />
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent 
-          className="absolute w-80 p-6 cursor-move select-none touch-none"
+          className="absolute w-80 p-6 cursor-move"
           style={{ 
-            transform: `translate3d(${dialogPosition.x}px, ${dialogPosition.y}px, 0)`,
-            willChange: 'transform',
-            transition: isDragging ? 'none' : 'transform 0.2s ease-out',
-            touchAction: 'none'
+            left: `${dialogPosition.x}px`, 
+            top: `${dialogPosition.y}px`,
+            transform: 'none'
           }}
-          onMouseDown={useCallback((e: React.MouseEvent) => {
+          onMouseDown={(e) => {
             if (e.target === e.currentTarget) {
               setIsDragging(true);
               const rect = e.currentTarget.getBoundingClientRect();
@@ -166,43 +152,21 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                 y: e.clientY - rect.top
               });
             }
-          }, [])}
-          onMouseMove={useCallback((e: React.MouseEvent) => {
+          }}
+          onMouseMove={(e) => {
             if (isDragging) {
-              requestAnimationFrame(() => {
-                // Get viewport dimensions
-                const viewportWidth = window.innerWidth;
-                const viewportHeight = window.innerHeight;
-                
-                // Calculate new position
-                const newX = e.clientX - dragOffset.x;
-                const newY = e.clientY - dragOffset.y;
-                
-                // Apply boundary constraints
-                const dialogWidth = 320;
-                const dialogHeight = 400;
-                const constrainedX = Math.min(Math.max(0, newX), viewportWidth - dialogWidth);
-                const constrainedY = Math.min(Math.max(0, newY), viewportHeight - dialogHeight);
-                
-                setDialogPosition({
-                  x: constrainedX,
-                  y: constrainedY
-                });
+              setDialogPosition({
+                x: e.clientX - dragOffset.x,
+                y: e.clientY - dragOffset.y
               });
             }
-          }, [isDragging, dragOffset])}
-          onMouseUp={useCallback(() => setIsDragging(false), [])}
-          onMouseLeave={useCallback(() => setIsDragging(false), [])}
+          }}
+          onMouseUp={() => setIsDragging(false)}
+          onMouseLeave={() => setIsDragging(false)}
         >
           <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
             <X className="h-4 w-4" />
           </DialogClose>
-          <DialogTitle className="text-lg font-semibold">
-            Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
-          </DialogTitle>
-          <DialogDescription className="sr-only">
-            Configure wheel slice settings including color, label, and text options
-          </DialogDescription>
           <div className="space-y-4 pt-2">
             <div className="space-y-2">
               <Label>Choose Color for Slice {selectedSlice !== null ? selectedSlice + 1 : ''}</Label>
