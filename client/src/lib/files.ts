@@ -56,8 +56,9 @@ function parseCsv(text: string): WheelConfig {
   const headers = lines[0].split(',');
   const values = lines[1].split(',');
   
+  const slices = parseInt(values[headers.indexOf('slices')]);
   return {
-    slices: parseInt(values[headers.indexOf('slices')]),
+    slices,
     circumference: parseInt(values[headers.indexOf('circumference')]),
     randomSizes: values[headers.indexOf('randomSizes')] === 'true',
     spinSpeed: parseFloat(values[headers.indexOf('spinSpeed')]),
@@ -69,6 +70,7 @@ function parseCsv(text: string): WheelConfig {
     sliceLabels: JSON.parse(values[headers.indexOf('sliceLabels')] || '[]'),
     textRotations: JSON.parse(values[headers.indexOf('textRotations')] || '[]'),
     textVertical: JSON.parse(values[headers.indexOf('textVertical')] || '[]'),
+    sliceSizes: Array(slices).fill(2 * Math.PI / slices),
   };
 }
 

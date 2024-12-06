@@ -107,25 +107,39 @@ export function renderWheel(
       ctx.textBaseline = 'middle';
       
       if (config.textVertical[i]) {
-        // Calculate font size based on text length and available space
+        // Calculate arc length and available space for this slice
+        const arcLength = size * radius;
+        const sliceHeight = arcLength * 0.5; // Use half the arc length as max height
+        const padding = sliceHeight * 0.1; // 10% padding
+        const availableSliceHeight = sliceHeight - (padding * 2);
+        
+        // Calculate proportional font size based on slice size
         const chars = label.split('');
-        const fontSize = Math.min(baseFontSize, availableHeight / (chars.length * 1.2));
+        const sliceProportion = size / (2 * Math.PI); // Proportion of the wheel this slice takes
+        const proportionalBase = baseFontSize * Math.sqrt(sliceProportion); // Scale base size by square root of proportion
+        const fontSize = Math.min(
+          proportionalBase,
+          availableSliceHeight / (chars.length * 1.2)
+        );
+        
         ctx.font = `${fontSize}px Arial`;
-        
         const lineHeight = fontSize * 1.2;
-        const totalHeight = chars.length * lineHeight;
         
-        // Truncate text if it's too long
-        const maxChars = Math.floor(availableHeight / (fontSize * 1.2));
+        // Calculate maximum chars that can fit in this slice
+        const maxChars = Math.floor(availableSliceHeight / lineHeight);
         const displayChars = chars.slice(0, maxChars);
         if (chars.length > maxChars) {
           displayChars[maxChars - 1] = '…';
         }
         
-        // Center the text vertically within the padded space
+        const totalHeight = displayChars.length * lineHeight;
+        
+        // Center text vertically within the slice's available space
         displayChars.forEach((char, index) => {
           const yOffset = index * lineHeight - (totalHeight / 2) + (fontSize / 2);
-          ctx.fillText(char, 0, yOffset);
+          // Scale the y-offset based on slice size
+          const scaledYOffset = yOffset * sliceProportion;
+          ctx.fillText(char, 0, scaledYOffset);
         });
       } else {
         // Set horizontal text font size
