@@ -9,6 +9,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -147,7 +148,7 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                 placeholder="Enter slice label"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-4">
               <Label>Text Rotation</Label>
               <div className="grid grid-cols-4 gap-2">
                 {[0, 90, 180, 270].map((degree) => (
@@ -160,6 +161,22 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                     {degree}°
                   </Button>
                 ))}
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Custom Rotation</Label>
+                  <span className="text-sm text-muted-foreground">
+                    {selectedSlice !== null ? `${config.textRotations[selectedSlice]}°` : '0°'}
+                  </span>
+                </div>
+                <Slider
+                  value={[selectedSlice !== null ? config.textRotations[selectedSlice] : 0]}
+                  onValueChange={([value]) => handleTextRotation(value)}
+                  min={0}
+                  max={360}
+                  step={1}
+                  className="py-2"
+                />
               </div>
             </div>
           </div>
