@@ -22,6 +22,7 @@ export interface WheelConfig {
   sliceSizes: number[];
   textPadding: number[];
   fontSize: number[];
+  textFontStyle: ('proportional' | 'monospace')[];
 }
 
 export default function Home() {
@@ -41,6 +42,7 @@ export default function Home() {
     sliceSizes: Array(8).fill(2 * Math.PI / 8),
     textPadding: Array(8).fill(10), // Default 10% padding
     fontSize: Array(8).fill(0), // 0 means auto-calculated based on wheel size
+    textFontStyle: Array(8).fill('proportional'), // Default to proportional font
   });
 
   const [isSpinning, setIsSpinning] = useState(false);

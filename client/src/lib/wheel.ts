@@ -129,7 +129,8 @@ export function renderWheel(
           availableSliceHeight / (chars.length * 1.1) // Reduce spacing factor to 1.1
         );
         
-        ctx.font = `${fontSize}px Arial`;
+        const fontFamily = config.textFontStyle[i] === 'monospace' ? 'Courier New' : 'Arial';
+        ctx.font = `${fontSize}px ${fontFamily}`;
         const lineHeight = fontSize * 1.1; // Reduce line height for tighter spacing
         
         // Calculate maximum chars that can fit in this slice

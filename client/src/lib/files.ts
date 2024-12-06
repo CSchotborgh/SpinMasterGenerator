@@ -71,6 +71,9 @@ function parseCsv(text: string): WheelConfig {
     textRotations: JSON.parse(values[headers.indexOf('textRotations')] || '[]'),
     textVertical: JSON.parse(values[headers.indexOf('textVertical')] || '[]'),
     sliceSizes: Array(slices).fill(2 * Math.PI / slices),
+    textPadding: Array(slices).fill(10),
+    fontSize: Array(slices).fill(0),
+    textFontStyle: Array(slices).fill('proportional'),
   };
 }
 

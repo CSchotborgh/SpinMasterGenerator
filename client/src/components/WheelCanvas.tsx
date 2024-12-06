@@ -192,12 +192,28 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                   className="py-2"
                 />
               </div>
-              <div className="flex items-center space-x-2">
-                <Switch
-                  checked={selectedSlice !== null ? config.textVertical[selectedSlice] : false}
-                  onCheckedChange={handleVerticalTextToggle}
-                />
-                <Label>Vertical Text</Label>
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    checked={selectedSlice !== null ? config.textVertical[selectedSlice] : false}
+                    onCheckedChange={handleVerticalTextToggle}
+                  />
+                  <Label>Vertical Text</Label>
+                </div>
+                {selectedSlice !== null && config.textVertical[selectedSlice] && (
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      checked={selectedSlice !== null ? config.textFontStyle[selectedSlice] === 'monospace' : false}
+                      onCheckedChange={(checked) => {
+                        if (selectedSlice === null) return;
+                        const newTextFontStyle = [...config.textFontStyle];
+                        newTextFontStyle[selectedSlice] = checked ? 'monospace' : 'proportional';
+                        onConfigChange({ ...config, textFontStyle: newTextFontStyle });
+                      }}
+                    />
+                    <Label>Non-proportional Font</Label>
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
