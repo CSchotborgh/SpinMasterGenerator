@@ -18,6 +18,7 @@ export interface WheelConfig {
   customColors: (string | null)[];
   sliceLabels: string[];
   textRotations: number[];
+  textVertical: boolean[];
 }
 
 export default function Home() {
@@ -33,6 +34,7 @@ export default function Home() {
     customColors: Array(8).fill(null),
     sliceLabels: Array(8).fill(''),
     textRotations: Array(8).fill(0),
+    textVertical: Array(8).fill(false),
   });
 
   const [isSpinning, setIsSpinning] = useState(false);

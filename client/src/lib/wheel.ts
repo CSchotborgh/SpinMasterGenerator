@@ -95,7 +95,17 @@ export function renderWheel(
       ctx.textBaseline = 'middle';
       
       // Draw text
-      ctx.fillText(label, 0, 0);
+      if (config.textVertical[i]) {
+        // Draw vertical text
+        const chars = label.split('');
+        const lineHeight = 16;
+        chars.forEach((char, index) => {
+          ctx.fillText(char, 0, index * lineHeight - (chars.length * lineHeight / 2));
+        });
+      } else {
+        // Draw horizontal text
+        ctx.fillText(label, 0, 0);
+      }
       
       // Restore context
       ctx.restore();

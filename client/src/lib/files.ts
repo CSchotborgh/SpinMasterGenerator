@@ -68,6 +68,7 @@ function parseCsv(text: string): WheelConfig {
     customColors: JSON.parse(values[headers.indexOf('customColors')] || '[]'),
     sliceLabels: JSON.parse(values[headers.indexOf('sliceLabels')] || '[]'),
     textRotations: JSON.parse(values[headers.indexOf('textRotations')] || '[]'),
+    textVertical: JSON.parse(values[headers.indexOf('textVertical')] || '[]'),
   };
 }
 

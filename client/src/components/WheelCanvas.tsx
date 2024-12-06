@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -111,6 +112,14 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     onConfigChange({ ...config, textRotations: newTextRotations });
   };
 
+  const handleVerticalTextToggle = (checked: boolean) => {
+    if (selectedSlice === null) return;
+    
+    const newTextVertical = [...config.textVertical];
+    newTextVertical[selectedSlice] = checked;
+    onConfigChange({ ...config, textVertical: newTextVertical });
+  };
+
   return (
     <div className="flex justify-center items-center relative">
       <canvas
@@ -177,6 +186,13 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                   step={1}
                   className="py-2"
                 />
+              </div>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={selectedSlice !== null ? config.textVertical[selectedSlice] : false}
+                  onCheckedChange={handleVerticalTextToggle}
+                />
+                <Label>Vertical Text</Label>
               </div>
             </div>
           </div>
