@@ -2,7 +2,14 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import type { WheelConfig } from "../pages/Home";
+import type { WheelConfig, ColorScheme } from "../pages/Home";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface WheelControlsProps {
   config: WheelConfig;
@@ -102,8 +109,27 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled }: Whee
           />
         </div>
 
+        <div className="space-y-2">
+          <Label>Color Scheme</Label>
+          <Select
+            value={config.colorScheme}
+            onValueChange={(value: ColorScheme) => updateConfig("colorScheme", value)}
+            disabled={disabled}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a color scheme" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="default">Default</SelectItem>
+              <SelectItem value="pastel">Pastel</SelectItem>
+              <SelectItem value="neon">Neon</SelectItem>
+              <SelectItem value="monochrome">Monochrome</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <Button 
-          className="w-full" 
+          className="w-full mt-4" 
           size="lg"
           onClick={onSpin}
           disabled={disabled}

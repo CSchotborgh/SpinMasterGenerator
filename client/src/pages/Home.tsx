@@ -4,6 +4,8 @@ import { WheelControls } from "../components/WheelControls";
 import { FileControls } from "../components/FileControls";
 import { useState } from "react";
 
+export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome';
+
 export interface WheelConfig {
   slices: number;
   circumference: number;
@@ -12,6 +14,7 @@ export interface WheelConfig {
   spinDuration: number;
   startRamp: number;
   endRamp: number;
+  colorScheme: ColorScheme;
 }
 
 export default function Home() {
@@ -23,6 +26,7 @@ export default function Home() {
     spinDuration: 5,
     startRamp: 1,
     endRamp: 1,
+    colorScheme: 'default',
   });
 
   const [isSpinning, setIsSpinning] = useState(false);

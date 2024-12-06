@@ -30,12 +30,29 @@ export function renderWheel(
     });
   }
 
+  // Color schemes
+  const colorSchemes = {
+    default: [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
+      '#FFEEAD', '#D4A5A5', '#9B59B6', '#3498DB'
+    ],
+    pastel: [
+      '#FFB3BA', '#BAFFC9', '#BAE1FF', '#FFFFBA',
+      '#FFB3F7', '#B3FFEC', '#B3D9FF', '#FFC9B3'
+    ],
+    neon: [
+      '#FF1177', '#00FF66', '#00FFFF', '#FFE600',
+      '#FF00FF', '#00FFC4', '#0066FF', '#FF8800'
+    ],
+    monochrome: [
+      '#2B2B2B', '#404040', '#555555', '#6B6B6B',
+      '#808080', '#959595', '#AAAAAA', '#BFBFBF'
+    ]
+  };
+
   // Draw slices
   let currentAngle = 0;
-  const colors = [
-    '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
-    '#FFEEAD', '#D4A5A5', '#9B59B6', '#3498DB'
-  ];
+  const colors = colorSchemes[config.colorScheme || 'default'];
 
   sliceSizes.forEach((size, i) => {
     ctx.beginPath();
