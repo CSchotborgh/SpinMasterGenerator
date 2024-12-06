@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -101,6 +102,14 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
     onConfigChange({ ...config, sliceLabels: newSliceLabels });
   };
 
+  const handleTextRotation = (degree: number) => {
+    if (selectedSlice === null) return;
+    
+    const newTextRotations = [...config.textRotations];
+    newTextRotations[selectedSlice] = degree;
+    onConfigChange({ ...config, textRotations: newTextRotations });
+  };
+
   return (
     <div className="flex justify-center items-center relative">
       <canvas
@@ -137,6 +146,21 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                 onChange={(e) => handleLabelChange(e.target.value)}
                 placeholder="Enter slice label"
               />
+            </div>
+            <div className="space-y-2">
+              <Label>Text Rotation</Label>
+              <div className="grid grid-cols-4 gap-2">
+                {[0, 90, 180, 270].map((degree) => (
+                  <Button
+                    key={degree}
+                    variant={selectedSlice !== null && config.textRotations[selectedSlice] === degree ? "default" : "outline"}
+                    onClick={() => handleTextRotation(degree)}
+                    className="p-2"
+                  >
+                    {degree}°
+                  </Button>
+                ))}
+              </div>
             </div>
           </div>
         </PopoverContent>

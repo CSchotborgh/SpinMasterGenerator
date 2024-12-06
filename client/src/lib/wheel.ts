@@ -84,7 +84,9 @@ export function renderWheel(
       
       // Rotate and position text
       ctx.translate(x, y);
-      ctx.rotate(labelAngle + Math.PI / 2);
+      // Apply text rotation (convert degrees to radians) and add base rotation
+      const textRotation = (config.textRotations[i] * Math.PI / 180) + labelAngle + Math.PI / 2;
+      ctx.rotate(textRotation);
       
       // Set text properties
       ctx.fillStyle = '#000000';
