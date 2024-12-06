@@ -88,32 +88,53 @@ export function renderWheel(
       const textRotation = (config.textRotations[i] * Math.PI / 180) + labelAngle + Math.PI / 2;
       ctx.rotate(textRotation);
       
+      // Calculate available space and font size
+      const maxSliceHeight = radius * 0.5; // Maximum height available in slice
+      const padding = maxSliceHeight * 0.1; // 10% padding
+      const availableHeight = maxSliceHeight - (padding * 2);
+      const baseFontSize = Math.max(12, config.circumference / 30);
+      
       // Set text properties
       ctx.fillStyle = '#000000';
-      ctx.font = '16px Arial';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       
-      // Draw text
       if (config.textVertical[i]) {
-        // Calculate exact center point of the slice
-        const sliceCenterX = labelRadius * Math.cos(currentAngle + (size / 2));
-        const sliceCenterY = labelRadius * Math.sin(currentAngle + (size / 2));
-        
-        // Draw vertical text
+        // Calculate font size based on text length and available space
         const chars = label.split('');
-        const fontSize = 16;
-        const lineHeight = fontSize * 1.2; // Add some spacing between characters
+        const fontSize = Math.min(baseFontSize, availableHeight / (chars.length * 1.2));
+        ctx.font = `${fontSize}px Arial`;
+        
+        const lineHeight = fontSize * 1.2;
         const totalHeight = chars.length * lineHeight;
         
-        // Center the text vertically within the slice
-        chars.forEach((char, index) => {
+        // Truncate text if it's too long
+        const maxChars = Math.floor(availableHeight / (fontSize * 1.2));
+        const displayChars = chars.slice(0, maxChars);
+        if (chars.length > maxChars) {
+          displayChars[maxChars - 1] = '…';
+        }
+        
+        // Center the text vertically within the padded space
+        displayChars.forEach((char, index) => {
           const yOffset = index * lineHeight - (totalHeight / 2) + (fontSize / 2);
           ctx.fillText(char, 0, yOffset);
         });
       } else {
-        // Draw horizontal text
-        ctx.fillText(label, 0, 0);
+        // Set horizontal text font size
+        ctx.font = `${baseFontSize}px Arial`;
+        
+        // Truncate horizontal text if too wide
+        const maxWidth = labelRadius * 0.8;
+        let displayText = label;
+        let textWidth = ctx.measureText(displayText).width;
+        
+        while (textWidth > maxWidth && displayText.length > 1) {
+          displayText = displayText.slice(0, -1) + '…';
+          textWidth = ctx.measureText(displayText).width;
+        }
+        
+        ctx.fillText(displayText, 0, 0);
       }
       
       // Restore context
