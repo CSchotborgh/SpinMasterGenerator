@@ -110,9 +110,7 @@ export function renderWheel(
         // Calculate arc length and available space for this slice
         const arcLength = size * radius;
         const sliceHeight = arcLength * 0.8; // Use 80% of arc length as max height
-        const paddingPercent = config.textPadding[i];
-        const padding = sliceHeight * (paddingPercent / 100);
-        const availableSliceHeight = sliceHeight - (padding * 2);
+        const availableSliceHeight = sliceHeight;
         
         // Calculate width at different distances from center
         const innerRadius = radius * 0.3; // Start text from 30% of radius

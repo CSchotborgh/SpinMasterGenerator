@@ -215,27 +215,7 @@ export function WheelCanvas({ config, isSpinning, onSpinComplete, onConfigChange
                   </div>
                 )}
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <Label>Text Padding</Label>
-                  <span className="text-sm text-muted-foreground">
-                    {selectedSlice !== null ? `${config.textPadding[selectedSlice]}%` : '10%'}
-                  </span>
-                </div>
-                <Slider
-                  value={[selectedSlice !== null ? config.textPadding[selectedSlice] : 10]}
-                  onValueChange={([value]) => {
-                    if (selectedSlice === null) return;
-                    const newTextPadding = [...config.textPadding];
-                    newTextPadding[selectedSlice] = value;
-                    onConfigChange({ ...config, textPadding: newTextPadding });
-                  }}
-                  min={0}
-                  max={50}
-                  step={1}
-                  className="py-2"
-                />
-              </div>
+              
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label>Font Size</Label>
