@@ -40,6 +40,7 @@ export function WheelCanvas({
   const gifRef = useRef<GIF>();
   const framesRef = useRef<ImageData[]>([]);
   const [recordingProgress, setRecordingProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
@@ -155,7 +156,9 @@ export function WheelCanvas({
       }
 
       // Handle recording completion when stopping
-      if (isRecording && gifRef.current && framesRef.current.length > 0) {
+      if (isRecording && framesRef.current.length > 0 && !isProcessing) {
+        setIsProcessing(true);
+        
         toast({
           title: "Processing Recording",
           description: "Generating GIF animation...",
@@ -163,6 +166,40 @@ export function WheelCanvas({
         });
 
         try {
+          // Clean up any existing GIF instance
+          if (gifRef.current) {
+            gifRef.current.abort();
+          }
+
+          // Create new GIF instance
+          gifRef.current = new GIF({
+            workers: 2,
+            quality: 10,
+            width: canvas.width,
+            height: canvas.height,
+            workerScript: '/gif.worker.js',
+            debug: true,
+            dither: false
+          });
+
+          gifRef.current.on('progress', (percent: number) => {
+            setRecordingProgress(Math.round(percent * 100));
+          });
+
+          gifRef.current.on('finished', (blob: Blob) => {
+            setIsProcessing(false);
+            setRecordingProgress(0);
+            framesRef.current = [];
+            
+            onRecordingComplete(blob);
+            
+            // Clean up GIF instance
+            if (gifRef.current) {
+              gifRef.current.abort();
+              gifRef.current = undefined;
+            }
+          });
+
           console.log(`Processing ${framesRef.current.length} frames...`);
           
           // Create an offscreen canvas for frame processing
@@ -197,12 +234,22 @@ export function WheelCanvas({
           
         } catch (error) {
           console.error('Detailed error in frame processing:', error);
+          setIsProcessing(false);
+          setRecordingProgress(0);
+          framesRef.current = [];
+          
           toast({
             title: "Recording Error",
             description: `Failed to process animation frames: ${error instanceof Error ? error.message : 'Unknown error'}`,
             variant: "destructive",
             duration: 5000,
           });
+          
+          // Clean up GIF instance on error
+          if (gifRef.current) {
+            gifRef.current.abort();
+            gifRef.current = undefined;
+          }
         }
       } else if (gifRef.current) {
         gifRef.current.abort();
