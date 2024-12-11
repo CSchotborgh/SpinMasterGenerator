@@ -53,15 +53,29 @@ export default function Home() {
   const [isRecording, setIsRecording] = useState(false);
 
   const handleRecordingComplete = (gifBlob: Blob) => {
-    setIsRecording(false);
-    const url = URL.createObjectURL(gifBlob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'wheel-animation.gif';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    try {
+      setIsRecording(false);
+      const url = URL.createObjectURL(gifBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'wheel-animation.gif';
+      document.body.appendChild(a);
+      
+      // Use setTimeout to ensure the download triggers after the blob is ready
+      setTimeout(() => {
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error('Error downloading GIF:', error);
+      toast({
+        title: "Download Error",
+        description: "Failed to download the animation. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
   };
 
   return (

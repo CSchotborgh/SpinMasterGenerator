@@ -104,13 +104,27 @@ export function WheelCanvas({
         });
 
         gifRef.current.on('finished', (blob: Blob, data: Uint8Array) => {
+          // First notify about completion
           toast({
             title: "Recording Complete",
-            description: "Your animation has been saved to downloads",
-            duration: 5000,
+            description: "Processing your animation for download...",
+            duration: 3000,
           });
-          onRecordingComplete(blob);
-          gifRef.current?.abort(); // Clean up
+
+          // Use setTimeout to ensure the UI updates before processing
+          setTimeout(() => {
+            onRecordingComplete(blob);
+            
+            // Show download success notification
+            toast({
+              title: "Download Ready",
+              description: "Your animation has been downloaded",
+              duration: 5000,
+            });
+
+            // Clean up
+            gifRef.current?.abort();
+          }, 500);
         });
 
         gifRef.current.on('error', (error: Error) => {
