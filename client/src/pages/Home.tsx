@@ -55,10 +55,11 @@ export default function Home() {
   const handleRecordingComplete = (gifBlob: Blob) => {
     try {
       setIsRecording(false);
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const url = URL.createObjectURL(gifBlob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'wheel-animation.gif';
+      a.download = `wheel-animation-${timestamp}.gif`;
       document.body.appendChild(a);
       
       // Use setTimeout to ensure the download triggers after the blob is ready
