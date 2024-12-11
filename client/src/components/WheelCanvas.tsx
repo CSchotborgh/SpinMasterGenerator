@@ -76,12 +76,15 @@ export function WheelCanvas({
           duration: 3000,
         });
 
+        // Initialize GIF.js with proper worker path and settings
         gifRef.current = new GIF({
           workers: 2,
           quality: 10,
           width: canvas.width,
           height: canvas.height,
-          workerScript: '/gif.worker.js'
+          workerScript: '/gif.worker.js',
+          debug: true,
+          dither: false // Disable dithering for faster processing
         });
 
         gifRef.current.on('progress', (percent: number) => {
@@ -160,28 +163,46 @@ export function WheelCanvas({
         });
 
         try {
-          // Add all captured frames to GIF
-          framesRef.current.forEach(frame => {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = canvas.width;
-            tempCanvas.height = canvas.height;
-            const tempCtx = tempCanvas.getContext('2d');
-            if (tempCtx) {
-              tempCtx.putImageData(frame, 0, 0);
-              gifRef.current?.addFrame(tempCanvas, { delay: frameInterval });
+          console.log(`Processing ${framesRef.current.length} frames...`);
+          
+          // Create an offscreen canvas for frame processing
+          const offscreenCanvas = document.createElement('canvas');
+          offscreenCanvas.width = canvas.width;
+          offscreenCanvas.height = canvas.height;
+          const offscreenCtx = offscreenCanvas.getContext('2d');
+          
+          if (!offscreenCtx) {
+            throw new Error('Failed to get offscreen canvas context');
+          }
+          
+          // Process frames
+          for (let i = 0; i < framesRef.current.length; i++) {
+            const frame = framesRef.current[i];
+            offscreenCtx.putImageData(frame, 0, 0);
+            
+            // Add frame to GIF with proper delay
+            gifRef.current?.addFrame(offscreenCanvas, {
+              delay: frameInterval,
+              copy: true
+            });
+            
+            // Log progress
+            if (i % 10 === 0) {
+              console.log(`Processed ${i + 1}/${framesRef.current.length} frames`);
             }
-          });
+          }
 
-          // Render the GIF
-          gifRef.current.render();
+          console.log('Starting GIF render...');
+          gifRef.current?.render();
+          
         } catch (error) {
+          console.error('Detailed error in frame processing:', error);
           toast({
             title: "Recording Error",
-            description: "Failed to process animation frames. Please try again.",
+            description: `Failed to process animation frames: ${error instanceof Error ? error.message : 'Unknown error'}`,
             variant: "destructive",
             duration: 5000,
           });
-          console.error('Error processing frames:', error);
         }
       } else if (gifRef.current) {
         gifRef.current.abort();
