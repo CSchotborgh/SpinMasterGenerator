@@ -3,21 +3,6 @@ import GIF from 'gif.js';
 import type { WheelConfig } from "../pages/Home";
 import { renderWheel, spinWheel, getSliceAtPoint } from "../lib/wheel";
 import { useToast } from "@/hooks/use-toast";
-
-interface GifOptions {
-  workers: number;
-  quality: number;
-  width: number;
-  height: number;
-  workerScript: string;
-}
-
-interface GifEvents {
-  finished: (blob: Blob, data: Uint8Array) => void;
-  progress: (percent: number) => void;
-  error: (error: Error) => void;
-  abort: () => void;
-}
 import {
   Dialog,
   DialogContent,
@@ -52,7 +37,8 @@ export function WheelCanvas({
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
-  const gifRef = useRef<GIF<GifOptions>>();
+  const gifRef = useRef<GIF>();
+  const framesRef = useRef<ImageData[]>([]);
   const [recordingProgress, setRecordingProgress] = useState(0);
   const [selectedSlice, setSelectedSlice] = useState<number | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -74,14 +60,13 @@ export function WheelCanvas({
     // Initial render
     renderWheel(ctx, config);
 
-    // Handle spinning animation and recording
+    const frameRate = 30; // frames per second
+    const frameInterval = 1000 / frameRate;
+    let lastFrameTime = 0;
+
     if (isSpinning) {
       let startTime = performance.now();
-      let rotation = 0;
-      let frames: ImageData[] = [];
-      const frameRate = 30; // frames per second
-      const frameInterval = 1000 / frameRate;
-      let lastFrameTime = 0;
+      framesRef.current = []; // Reset frames array
 
       // Initialize GIF.js if recording
       if (isRecording) {
@@ -91,7 +76,7 @@ export function WheelCanvas({
           duration: 3000,
         });
 
-        gifRef.current = new GIF<GifOptions>({
+        gifRef.current = new GIF({
           workers: 2,
           quality: 10,
           width: canvas.width,
@@ -103,27 +88,25 @@ export function WheelCanvas({
           setRecordingProgress(Math.round(percent * 100));
         });
 
-        gifRef.current.on('finished', (blob: Blob, data: Uint8Array) => {
-          // First notify about completion
+        gifRef.current.on('finished', (blob: Blob) => {
           toast({
             title: "Recording Complete",
             description: "Processing your animation for download...",
             duration: 3000,
           });
 
-          // Use setTimeout to ensure the UI updates before processing
           setTimeout(() => {
             onRecordingComplete(blob);
             
-            // Show download success notification
             toast({
               title: "Download Ready",
               description: "Your animation has been downloaded",
               duration: 5000,
             });
 
-            // Clean up
-            gifRef.current?.abort();
+            if (gifRef.current) {
+              gifRef.current.abort();
+            }
           }, 500);
         });
 
@@ -142,50 +125,18 @@ export function WheelCanvas({
         const elapsed = (currentTime - startTime) / 1000;
         
         if (elapsed >= config.spinDuration) {
-          if (isRecording && gifRef.current && frames.length > 0) {
-            toast({
-              title: "Processing Recording",
-              description: "Generating GIF animation...",
-              duration: 3000,
-            });
-
-            try {
-              // Add all captured frames to GIF
-              frames.forEach(frame => {
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = canvas.width;
-                tempCanvas.height = canvas.height;
-                const tempCtx = tempCanvas.getContext('2d');
-                if (tempCtx) {
-                  tempCtx.putImageData(frame, 0, 0);
-                  gifRef.current?.addFrame(tempCanvas, { delay: frameInterval });
-                }
-              });
-
-              // Render the GIF
-              gifRef.current.render();
-            } catch (error) {
-              toast({
-                title: "Recording Error",
-                description: "Failed to process animation frames. Please try again.",
-                variant: "destructive",
-                duration: 5000,
-              });
-              console.error('Error processing frames:', error);
-            }
-          }
           onSpinComplete();
-          renderWheel(ctx, config, rotation);
+          renderWheel(ctx, config, 0);
           return;
         }
 
-        rotation = spinWheel(elapsed, config);
+        const rotation = spinWheel(elapsed, config);
         renderWheel(ctx, config, rotation);
 
         // Capture frame for recording
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          frames.push(imageData);
+          framesRef.current.push(imageData);
           lastFrameTime = currentTime;
         }
 
@@ -199,7 +150,40 @@ export function WheelCanvas({
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }
-      if (gifRef.current) {
+
+      // Handle recording completion when stopping
+      if (isRecording && gifRef.current && framesRef.current.length > 0) {
+        toast({
+          title: "Processing Recording",
+          description: "Generating GIF animation...",
+          duration: 3000,
+        });
+
+        try {
+          // Add all captured frames to GIF
+          framesRef.current.forEach(frame => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = canvas.width;
+            tempCanvas.height = canvas.height;
+            const tempCtx = tempCanvas.getContext('2d');
+            if (tempCtx) {
+              tempCtx.putImageData(frame, 0, 0);
+              gifRef.current?.addFrame(tempCanvas, { delay: frameInterval });
+            }
+          });
+
+          // Render the GIF
+          gifRef.current.render();
+        } catch (error) {
+          toast({
+            title: "Recording Error",
+            description: "Failed to process animation frames. Please try again.",
+            variant: "destructive",
+            duration: 5000,
+          });
+          console.error('Error processing frames:', error);
+        }
+      } else if (gifRef.current) {
         gifRef.current.abort();
       }
     };
@@ -308,19 +292,15 @@ export function WheelCanvas({
           Recording: {recordingProgress}%
         </div>
       )}
-      <Dialog 
-        open={dialogOpen} 
-        onOpenChange={setDialogOpen}
-      >
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent 
-          className="absolute overflow-y-auto p-6 bg-white rounded-lg"
+          className="absolute overflow-y-auto p-6 bg-white rounded-lg shadow-lg"
           style={{ 
             width: '320px',
             maxHeight: '80vh',
             top: dialogPosition.y,
             left: dialogPosition.x,
             transform: 'translate(-50%, -50%)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             cursor: isDragging ? 'grabbing' : 'grab',
             userSelect: 'none',
             zIndex: 50
