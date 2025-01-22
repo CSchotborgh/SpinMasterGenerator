@@ -238,22 +238,61 @@ export function getSliceAtPoint(
 }
 
 export function spinWheel(elapsed: number, config: WheelConfig): number {
-  const { spinSpeed, spinDuration } = config;
-  
-  // Physics constants
-  const initialVelocity = spinSpeed * 20 * (1 + Math.random() * 0.2); // Random initial velocity
-  const friction = config.friction || 3.5; // Use config friction
-  const minVelocity = config.minVelocity || 0.1;
-  
-  // Ensure minimum of 2 full rotations (4π radians) plus random extra
-  const minRotations = 2 * Math.PI * 2; // Minimum 2 rotations
-  const extraRotations = Math.random() * Math.PI * 2; // Up to 1 extra rotation
-  
-  // Calculate base position with physics
-  const basePosition = initialVelocity * (1 - Math.exp(-friction * elapsed)) / friction;
-  
-  // Ensure minimum rotation is met while preserving physics-based slowdown
-  const position = Math.max(basePosition, minRotations + extraRotations * (1 - elapsed / spinDuration));
-  
+  const {
+    spinSpeed,
+    spinDuration,
+    startRamp,
+    endRamp,
+    friction,
+    velocityVariation,
+    minVelocity
+  } = config;
+
+  // Constants for the three phases
+  const maxVelocity = spinSpeed * 20;
+  const accelerationPhase = startRamp;
+  const decelerationPhase = endRamp;
+  const steadyPhase = spinDuration - accelerationPhase - decelerationPhase;
+
+  let position = 0;
+  let currentVelocity = 0;
+
+  // Phase 1: Acceleration
+  if (elapsed <= accelerationPhase) {
+    // Quadratic ease-in for smooth acceleration
+    const progress = elapsed / accelerationPhase;
+    currentVelocity = maxVelocity * (progress * progress);
+    position = (currentVelocity * elapsed) / 2;
+  }
+  // Phase 2: Max speed loop
+  else if (elapsed <= accelerationPhase + steadyPhase) {
+    // Calculate position from acceleration phase
+    const accelerationDistance = (maxVelocity * accelerationPhase) / 2;
+
+    // Add steady phase distance
+    const steadyElapsed = elapsed - accelerationPhase;
+    const steadyVelocity = maxVelocity * (1 + Math.sin(steadyElapsed * 4) * velocityVariation);
+    position = accelerationDistance + (steadyVelocity * steadyElapsed);
+  }
+  // Phase 3: Deceleration
+  else {
+    // Calculate position from previous phases
+    const accelerationDistance = (maxVelocity * accelerationPhase) / 2;
+    const steadyDistance = maxVelocity * steadyPhase;
+
+    // Add deceleration phase
+    const decelerationProgress = (elapsed - (accelerationPhase + steadyPhase)) / decelerationPhase;
+    const t = 1 - decelerationProgress;
+    currentVelocity = maxVelocity * (t * t); // Quadratic ease-out
+
+    const decelerationDistance = maxVelocity * (1 - t * t * t) * decelerationPhase;
+    position = accelerationDistance + steadyDistance + decelerationDistance;
+  }
+
+  // Ensure we maintain minimum velocity until the very end
+  if (elapsed < spinDuration) {
+    currentVelocity = Math.max(currentVelocity, minVelocity);
+  }
+
   return position;
 }

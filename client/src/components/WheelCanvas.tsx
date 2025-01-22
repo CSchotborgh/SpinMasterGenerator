@@ -62,9 +62,10 @@ export function WheelCanvas({
 
     renderWheel(ctx, config, 0);
 
-    const frameRate = 30;
+    const frameRate = 60; // Increased for smoother animation
     const frameInterval = 1000 / frameRate;
     let lastFrameTime = 0;
+    let finalRotation = 0;
 
     if (isSpinning) {
       let startTime = performance.now();
@@ -109,8 +110,15 @@ export function WheelCanvas({
         const elapsed = (currentTime - startTime) / 1000;
 
         if (elapsed >= config.spinDuration) {
+          // Store the final rotation instead of resetting
+          finalRotation = spinWheel(config.spinDuration, config);
           onSpinComplete();
-          renderWheel(ctx, config, 0);
+
+          // Apply final rotation to container
+          if (containerRef.current) {
+            containerRef.current.style.transform = `rotate(${finalRotation}rad)`;
+          }
+          setSpinAngle(finalRotation);
           return;
         }
 
