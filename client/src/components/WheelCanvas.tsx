@@ -36,6 +36,7 @@ export function WheelCanvas({
 }: WheelCanvasProps) {
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const animationRef = useRef<number>();
   const gifRef = useRef<GIF>();
   const framesRef = useRef<ImageData[]>([]);
@@ -58,8 +59,8 @@ export function WheelCanvas({
     canvas.width = config.circumference;
     canvas.height = config.circumference;
 
-    // Initial render
-    renderWheel(ctx, config);
+    // Initial render with no rotation (the container will handle rotation)
+    renderWheel(ctx, config, 0);
 
     const frameRate = 30; // frames per second
     const frameInterval = 1000 / frameRate;
@@ -93,35 +94,17 @@ export function WheelCanvas({
         });
 
         gifRef.current.on('finished', (blob: Blob) => {
-          toast({
-            title: "Recording Complete",
-            description: "Processing your animation for download...",
-            duration: 3000,
-          });
+          setIsProcessing(false);
+          setRecordingProgress(0);
+          framesRef.current = [];
 
-          setTimeout(() => {
-            onRecordingComplete(blob);
+          onRecordingComplete(blob);
 
-            toast({
-              title: "Download Ready",
-              description: "Your animation has been downloaded",
-              duration: 5000,
-            });
-
-            if (gifRef.current) {
-              gifRef.current.abort();
-            }
-          }, 500);
-        });
-
-        gifRef.current.on('error', (error: Error) => {
-          toast({
-            title: "Recording Error",
-            description: "Failed to generate animation. Please try again.",
-            variant: "destructive",
-            duration: 5000,
-          });
-          console.error('GIF generation error:', error);
+          // Clean up GIF instance
+          if (gifRef.current) {
+            gifRef.current.abort();
+            gifRef.current = undefined;
+          }
         });
       }
 
@@ -134,8 +117,11 @@ export function WheelCanvas({
           return;
         }
 
-        const rotation = spinWheel(elapsed, config);
-        renderWheel(ctx, config, rotation);
+        // Apply spin animation through container rotation
+        if (containerRef.current) {
+          const rotation = spinWheel(elapsed, config);
+          containerRef.current.style.transform = `rotate(${rotation}rad)`;
+        }
 
         // Capture frame for recording
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
@@ -257,6 +243,13 @@ export function WheelCanvas({
     };
   }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast]);
 
+  // Apply manual rotation when not spinning
+  useEffect(() => {
+    if (!isSpinning && containerRef.current) {
+      containerRef.current.style.transform = `rotate(${config.manualRotation}rad)`;
+    }
+  }, [config.manualRotation, isSpinning]);
+
   const handleContextMenu = (e: React.MouseEvent<HTMLCanvasElement>) => {
     e.preventDefault();
     if (isSpinning) return;
@@ -265,52 +258,24 @@ export function WheelCanvas({
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    // Adjust coordinates based on current rotation
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const x = e.clientX - rect.left - centerX;
+    const y = e.clientY - rect.top - centerY;
 
-    const sliceIndex = getSliceAtPoint(x, y, config);
+    // Apply inverse rotation to get correct slice
+    const angle = -config.manualRotation;
+    const rotatedX = x * Math.cos(angle) - y * Math.sin(angle) + centerX;
+    const rotatedY = x * Math.sin(angle) + y * Math.cos(angle) + centerY;
+
+    const sliceIndex = getSliceAtPoint(rotatedX, rotatedY, config);
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
       setDialogPosition({ x: e.clientX, y: e.clientY });
       setDialogOpen(true);
     }
   };
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isDragging) {
-        const x = e.clientX - dragOffset.x;
-        const y = e.clientY - dragOffset.y;
-
-        // Keep dialog within viewport bounds
-        const dialog = document.querySelector('[role="dialog"]');
-        if (dialog) {
-          const bounds = dialog.getBoundingClientRect();
-          const maxX = window.innerWidth - bounds.width;
-          const maxY = window.innerHeight - bounds.height;
-
-          setDialogPosition({
-            x: Math.min(Math.max(x, 0), maxX),
-            y: Math.min(Math.max(y, 0), maxY)
-          });
-        }
-      }
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-    };
-
-    if (isDragging) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isDragging, dragOffset]);
 
   const handleColorChange = (color: string) => {
     if (selectedSlice === null) return;
@@ -350,21 +315,25 @@ export function WheelCanvas({
 
   return (
     <div className="flex justify-center items-center relative">
-      <div className="relative">
+      <div 
+        ref={containerRef} 
+        className="relative transition-transform duration-100"
+        style={{ transform: `rotate(${config.manualRotation}rad)` }}
+      >
         <canvas
           ref={canvasRef}
           className="max-w-full h-auto shadow-lg rounded-full"
           onContextMenu={handleContextMenu}
         />
-        <div 
-          className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10" 
-          style={{ 
-            borderLeft: '60px solid transparent',
-            borderRight: '60px solid transparent',
-            borderBottom: '120px solid #000',
-          }} 
-        />
       </div>
+      <div 
+        className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10" 
+        style={{ 
+          borderLeft: '60px solid transparent',
+          borderRight: '60px solid transparent',
+          borderBottom: '120px solid #000',
+        }} 
+      />
       {isRecording && recordingProgress > 0 && (
         <div className="absolute top-4 right-4 bg-black/80 text-white px-4 py-2 rounded-md">
           Recording: {recordingProgress}%
