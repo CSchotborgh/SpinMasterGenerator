@@ -1,9 +1,6 @@
 import { Card } from "@/components/ui/card";
 import { WheelCanvas } from "../components/WheelCanvas";
-import { WheelControls } from "../components/WheelControls";
-import { FileControls } from "../components/FileControls";
-import { TemplateControls } from "../components/TemplateControls";
-import { RecordingControls } from "../components/RecordingControls";
+import { SidePanel } from "../components/SidePanel";
 import { useState } from "react";
 
 export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome' | 'sunset' | 'ocean';
@@ -97,32 +94,15 @@ export default function Home() {
           />
         </Card>
         
-        <div className="space-y-6">
-          <Card className="p-6">
-            <WheelControls
-              config={config}
-              onConfigChange={setConfig}
-              onSpin={() => setIsSpinning(true)}
-              disabled={isSpinning}
-            />
-          </Card>
-          
-          <Card className="p-6">
-            <TemplateControls
-              config={config}
-              onConfigChange={setConfig}
-              disabled={isSpinning}
-            />
-          </Card>
-
-          <Card className="p-6">
-            <RecordingControls
-              isRecording={isRecording}
-              onStartRecording={() => setIsRecording(true)}
-              onStopRecording={() => setIsRecording(false)}
-              disabled={isSpinning}
-            />
-          </Card>
+        <SidePanel
+          config={config}
+          onConfigChange={setConfig}
+          onSpin={() => setIsSpinning(true)}
+          isSpinning={isSpinning}
+          isRecording={isRecording}
+          onStartRecording={() => setIsRecording(true)}
+          onStopRecording={() => setIsRecording(false)}
+        />
 
           <Card className="p-6">
             <FileControls
