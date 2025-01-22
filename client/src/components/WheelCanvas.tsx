@@ -350,11 +350,21 @@ export function WheelCanvas({
 
   return (
     <div className="flex justify-center items-center relative">
-      <canvas
-        ref={canvasRef}
-        className="max-w-full h-auto shadow-lg rounded-full"
-        onContextMenu={handleContextMenu}
-      />
+      <div className="relative">
+        <canvas
+          ref={canvasRef}
+          className="max-w-full h-auto shadow-lg rounded-full"
+          onContextMenu={handleContextMenu}
+        />
+        <div 
+          className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10" 
+          style={{ 
+            borderLeft: '15px solid transparent',
+            borderRight: '15px solid transparent',
+            borderBottom: '30px solid #000',
+          }} 
+        />
+      </div>
       {isRecording && recordingProgress > 0 && (
         <div className="absolute top-4 right-4 bg-black/80 text-white px-4 py-2 rounded-md">
           Recording: {recordingProgress}%
