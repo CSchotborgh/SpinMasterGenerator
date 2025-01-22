@@ -25,6 +25,7 @@ export interface WheelConfig {
   textVertical: boolean[];
   sliceSizes: number[];
   fontSize: number[];
+  manualRotation: number;
   textFontStyle: ('proportional' | 'monospace')[];
   textKerning: number[];
   verticalKerning: number[];
@@ -45,6 +46,7 @@ export default function Home() {
     colorScheme: 'default',
     customColors: Array(8).fill(null),
     sliceLabels: Array(8).fill(''),
+    manualRotation: 0,
     textRotations: Array(8).fill(0),
     textVertical: Array(8).fill(false),
     sliceSizes: Array(8).fill(2 * Math.PI / 8),

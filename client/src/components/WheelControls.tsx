@@ -166,6 +166,18 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled }: Whee
           />
         </div>
 
+        <div className="space-y-2">
+          <Label>Manual Rotation ({Math.round(config.manualRotation * (180/Math.PI))}°)</Label>
+          <Slider
+            value={[config.manualRotation]}
+            onValueChange={([v]) => updateConfig("manualRotation", v)}
+            min={0}
+            max={Math.PI * 2}
+            step={0.01}
+            disabled={disabled || isSpinning}
+          />
+        </div>
+
         <Button 
           className="w-full mt-4" 
           size="lg"
