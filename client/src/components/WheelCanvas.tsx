@@ -359,9 +359,9 @@ export function WheelCanvas({
         <div 
           className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10" 
           style={{ 
-            borderLeft: '15px solid transparent',
-            borderRight: '15px solid transparent',
-            borderBottom: '30px solid #000',
+            borderLeft: '60px solid transparent',
+            borderRight: '60px solid transparent',
+            borderBottom: '120px solid #000',
           }} 
         />
       </div>
