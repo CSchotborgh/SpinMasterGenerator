@@ -238,60 +238,22 @@ export function getSliceAtPoint(
 }
 
 export function spinWheel(elapsed: number, config: WheelConfig): number {
-  const {
-    spinSpeed,
+  const { 
+    spinSpeed, 
     spinDuration,
-    startRamp,
-    endRamp,
     friction,
-    velocityVariation,
     minVelocity
   } = config;
 
-  // Constants for the three phases
-  const maxVelocity = spinSpeed * 20;
-  const accelerationPhase = startRamp;
-  const decelerationPhase = endRamp;
-  const steadyPhase = spinDuration - accelerationPhase - decelerationPhase;
+  // Initial velocity based on spin speed with some randomization
+  const initialVelocity = spinSpeed * 20 * (1 + Math.random() * 0.5);
 
-  // Add randomization to total rotation
-  // This ensures we don't always land on the same slice
-  const randomRotations = Math.floor(Math.random() * 3) + 4; // 4-6 full rotations
-  const targetRotation = randomRotations * 2 * Math.PI + Math.random() * 2 * Math.PI;
+  // Use exponential decay for natural slowdown
+  // This creates a smooth deceleration curve
+  const currentVelocity = initialVelocity * Math.exp(-friction * elapsed);
 
-  let position = 0;
-  let currentVelocity = 0;
-
-  // Phase 1: Acceleration
-  if (elapsed <= accelerationPhase) {
-    const progress = elapsed / accelerationPhase;
-    currentVelocity = maxVelocity * (progress * progress);
-    position = (targetRotation * progress * progress) / 3;
-  }
-  // Phase 2: Max speed loop
-  else if (elapsed <= accelerationPhase + steadyPhase) {
-    const steadyElapsed = elapsed - accelerationPhase;
-    const steadyProgress = steadyElapsed / steadyPhase;
-
-    // Calculate base position including acceleration phase
-    position = (targetRotation / 3) + 
-               (targetRotation / 2) * steadyProgress +
-               maxVelocity * Math.sin(steadyElapsed * 4) * velocityVariation;
-  }
-  // Phase 3: Deceleration
-  else {
-    const decelerationProgress = (elapsed - (accelerationPhase + steadyPhase)) / decelerationPhase;
-    const t = 1 - decelerationProgress;
-
-    // Smooth out the final approach to target rotation
-    position = targetRotation - (targetRotation / 6) * (t * t);
-    currentVelocity = maxVelocity * (t * t);
-  }
-
-  // Ensure minimum velocity until near the end
-  if (elapsed < spinDuration - decelerationPhase / 2) {
-    currentVelocity = Math.max(currentVelocity, minVelocity);
-  }
+  // Calculate position based on velocity decay
+  const position = (initialVelocity * (1 - Math.exp(-friction * elapsed))) / friction;
 
   return position;
 }
