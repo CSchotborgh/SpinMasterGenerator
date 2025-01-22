@@ -97,7 +97,7 @@ export default function Home() {
             />
             <Button
               size="lg"
-              className="w-[200px]"
+              className="w-[200px] mt-16"
               onClick={() => setIsSpinning(true)}
               disabled={isSpinning}
             >
