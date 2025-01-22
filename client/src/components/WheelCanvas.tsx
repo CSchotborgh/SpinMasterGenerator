@@ -7,6 +7,7 @@ import {
   Dialog,
   DialogContent,
   DialogClose,
+  DialogHeader,
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
@@ -16,7 +17,6 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
-import {DialogHeader} from "@/components/ui/dialog";
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -48,8 +48,7 @@ export function WheelCanvas({
   const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [spinAngle, setSpinAngle] = useState(0); // Added state for spin angle
-
+  const [spinAngle, setSpinAngle] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -58,22 +57,19 @@ export function WheelCanvas({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Set canvas size
     canvas.width = config.circumference;
     canvas.height = config.circumference;
 
-    // Initial render with no rotation (the container will handle rotation)
     renderWheel(ctx, config, 0);
 
-    const frameRate = 30; // frames per second
+    const frameRate = 30;
     const frameInterval = 1000 / frameRate;
     let lastFrameTime = 0;
 
     if (isSpinning) {
       let startTime = performance.now();
-      framesRef.current = []; // Reset frames array
+      framesRef.current = [];
 
-      // Initialize GIF.js if recording
       if (isRecording) {
         toast({
           title: "Recording Started",
@@ -81,7 +77,6 @@ export function WheelCanvas({
           duration: 3000,
         });
 
-        // Initialize GIF.js with proper worker path and settings
         gifRef.current = new GIF({
           workers: 2,
           quality: 10,
@@ -89,7 +84,7 @@ export function WheelCanvas({
           height: canvas.height,
           workerScript: '/gif.worker.js',
           debug: true,
-          dither: false // Disable dithering for faster processing
+          dither: false
         });
 
         gifRef.current.on('progress', (percent: number) => {
@@ -103,7 +98,6 @@ export function WheelCanvas({
 
           onRecordingComplete(blob);
 
-          // Clean up GIF instance
           if (gifRef.current) {
             gifRef.current.abort();
             gifRef.current = undefined;
@@ -120,14 +114,12 @@ export function WheelCanvas({
           return;
         }
 
-        // Apply spin animation through container rotation
         if (containerRef.current) {
           const rotation = spinWheel(elapsed, config);
           containerRef.current.style.transform = `rotate(${rotation}rad)`;
-          setSpinAngle(rotation); // Update spinAngle
+          setSpinAngle(rotation);
         }
 
-        // Capture frame for recording
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           framesRef.current.push(imageData);
@@ -145,7 +137,6 @@ export function WheelCanvas({
         cancelAnimationFrame(animationRef.current);
       }
 
-      // Handle recording completion when stopping
       if (isRecording && framesRef.current.length > 0 && !isProcessing) {
         setIsProcessing(true);
 
@@ -156,12 +147,10 @@ export function WheelCanvas({
         });
 
         try {
-          // Clean up any existing GIF instance
           if (gifRef.current) {
             gifRef.current.abort();
           }
 
-          // Create new GIF instance
           gifRef.current = new GIF({
             workers: 2,
             quality: 10,
@@ -183,7 +172,6 @@ export function WheelCanvas({
 
             onRecordingComplete(blob);
 
-            // Clean up GIF instance
             if (gifRef.current) {
               gifRef.current.abort();
               gifRef.current = undefined;
@@ -192,7 +180,6 @@ export function WheelCanvas({
 
           console.log(`Processing ${framesRef.current.length} frames...`);
 
-          // Create an offscreen canvas for frame processing
           const offscreenCanvas = document.createElement('canvas');
           offscreenCanvas.width = canvas.width;
           offscreenCanvas.height = canvas.height;
@@ -202,18 +189,15 @@ export function WheelCanvas({
             throw new Error('Failed to get offscreen canvas context');
           }
 
-          // Process frames
           for (let i = 0; i < framesRef.current.length; i++) {
             const frame = framesRef.current[i];
             offscreenCtx.putImageData(frame, 0, 0);
 
-            // Add frame to GIF with proper delay
             gifRef.current?.addFrame(offscreenCanvas, {
               delay: frameInterval,
               copy: true
             });
 
-            // Log progress
             if (i % 10 === 0) {
               console.log(`Processed ${i + 1}/${framesRef.current.length} frames`);
             }
@@ -235,7 +219,6 @@ export function WheelCanvas({
             duration: 5000,
           });
 
-          // Clean up GIF instance on error
           if (gifRef.current) {
             gifRef.current.abort();
             gifRef.current = undefined;
@@ -247,7 +230,6 @@ export function WheelCanvas({
     };
   }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast]);
 
-  // Apply manual rotation when not spinning
   useEffect(() => {
     if (!isSpinning && containerRef.current) {
       containerRef.current.style.transform = `rotate(${config.manualRotation}rad)`;
@@ -262,13 +244,11 @@ export function WheelCanvas({
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    // Adjust coordinates based on current rotation
     const centerX = rect.width / 2;
     const centerY = rect.height / 2;
     const x = e.clientX - rect.left - centerX;
     const y = e.clientY - rect.top - centerY;
 
-    // Apply inverse rotation to get correct slice
     const angle = -config.manualRotation;
     const rotatedX = x * Math.cos(angle) - y * Math.sin(angle) + centerX;
     const rotatedY = x * Math.sin(angle) + y * Math.cos(angle) + centerY;
@@ -329,13 +309,12 @@ export function WheelCanvas({
           className="max-w-full h-auto shadow-lg rounded-full"
           onContextMenu={handleContextMenu}
         />
-        {/* Add the hub */}
         <div
           className="absolute top-1/2 left-1/2 rounded-full overflow-hidden z-10 shadow-lg bg-white"
           style={{
             width: `${config.hubSize}px`,
             height: `${config.hubSize}px`,
-            transform: 'translate(-50%, -50%)', // Always centered, no rotation
+            transform: 'translate(-50%, -50%)',
           }}
         >
           {config.hubImage ? (
@@ -389,14 +368,14 @@ export function WheelCanvas({
             }
           }}
         >
-          <DialogHeader> {/* Added DialogHeader */}
-            <DialogTitle className="text-lg font-semibold dialog-header cursor-grab active:cursor-grabbing">
+          <DialogHeader className="dialog-header cursor-grab active:cursor-grabbing">
+            <DialogTitle>
               Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
             </DialogTitle>
-            <DialogDescription className="text-sm text-muted-foreground mb-4">
-              Customize the appearance and text of this wheel slice.
+            <DialogDescription>
+              Customize the appearance and text of this wheel slice. You can adjust colors, labels, and text orientation.
             </DialogDescription>
-          </DialogHeader> {/* DialogHeader closes here */}
+          </DialogHeader>
           <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
             <X className="h-4 w-4" />
           </DialogClose>
