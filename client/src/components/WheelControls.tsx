@@ -19,7 +19,7 @@ interface WheelControlsProps {
   isSpinning: boolean;
 }
 
-export function WheelControls({ config, onConfigChange, onSpin, disabled }: WheelControlsProps) {
+export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpinning }: WheelControlsProps) {
   const updateConfig = (key: keyof WheelConfig, value: number | boolean | string) => {
     onConfigChange({ ...config, [key]: value });
   };
