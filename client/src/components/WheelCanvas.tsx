@@ -335,10 +335,7 @@ export function WheelCanvas({
           style={{
             width: `${config.hubSize}px`,
             height: `${config.hubSize}px`,
-            transform: config.hubSpinsWithWheel
-              ? 'translate(-50%, -50%)'
-              : `translate(-50%, -50%) rotate(${-config.manualRotation}rad)`, // Counter-rotate when not spinning with wheel
-            transition: 'transform 0.1s',
+            transform: 'translate(-50%, -50%)', // Always centered, no rotation
           }}
         >
           {config.hubImage ? (
@@ -347,11 +344,7 @@ export function WheelCanvas({
               alt="Wheel Hub"
               className="w-full h-full object-cover"
               style={{
-                transform: config.hubSpinsWithWheel
-                  ? 'none'
-                  : isSpinning
-                    ? `rotate(${-spinAngle}rad)` // Counter-rotate during spin
-                    : 'none',
+                transform: config.hubSpinsWithWheel ? `rotate(${spinAngle}rad)` : 'none',
               }}
             />
           ) : (
