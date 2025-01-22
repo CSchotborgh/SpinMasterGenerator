@@ -50,6 +50,7 @@ export function SidePanel({
                 onConfigChange={onConfigChange}
                 onSpin={onSpin}
                 disabled={isSpinning}
+                isSpinning={isSpinning}
               />
             </AccordionContent>
           </AccordionItem>

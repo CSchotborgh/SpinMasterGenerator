@@ -16,6 +16,7 @@ interface WheelControlsProps {
   onConfigChange: (config: WheelConfig) => void;
   onSpin: () => void;
   disabled: boolean;
+  isSpinning: boolean;
 }
 
 export function WheelControls({ config, onConfigChange, onSpin, disabled }: WheelControlsProps) {
