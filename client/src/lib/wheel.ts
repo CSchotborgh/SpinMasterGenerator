@@ -253,13 +253,24 @@ export function spinWheel(elapsed: number, config: WheelConfig): number {
   let progress = elapsed / spinDuration;
   if (progress > 1) progress = 1;
 
-  // Apply easing for start and end ramps
+  // Apply easing for start and end ramps with randomization
   let speed = spinSpeed;
   if (elapsed < startRamp) {
+    // Initial ramp up
     speed *= elapsed / startRamp;
   } else if (elapsed > spinDuration - endRamp) {
+    // Randomized ramp down
     const timeLeft = spinDuration - elapsed;
-    speed *= timeLeft / endRamp;
+    const randomFactor = 0.5 + Math.random(); // Random factor between 0.5 and 1.5
+    speed *= (timeLeft / endRamp) * randomFactor;
+    
+    // Ensure smooth landing by gradually reducing randomness near the end
+    const endProgress = 1 - (timeLeft / endRamp);
+    if (endProgress > 0.8) {
+      // Smooth out the last 20% of the ramp
+      const smoothFactor = (1 - endProgress) * 5; // 1 to 0 in last 20%
+      speed *= smoothFactor;
+    }
   }
 
   return (progress * speed * Math.PI * 20) % (Math.PI * 2);
