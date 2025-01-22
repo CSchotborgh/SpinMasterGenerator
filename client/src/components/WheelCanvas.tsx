@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
+import {DialogHeader} from "@/components/ui/dialog"; // Assuming DialogHeader is defined here
+
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -26,13 +28,13 @@ interface WheelCanvasProps {
   onRecordingComplete: (gifBlob: Blob) => void;
 }
 
-export function WheelCanvas({ 
-  config, 
-  isSpinning, 
+export function WheelCanvas({
+  config,
+  isSpinning,
   isRecording,
-  onSpinComplete, 
+  onSpinComplete,
   onConfigChange,
-  onRecordingComplete 
+  onRecordingComplete
 }: WheelCanvasProps) {
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -315,8 +317,8 @@ export function WheelCanvas({
 
   return (
     <div className="flex justify-center items-center relative">
-      <div 
-        ref={containerRef} 
+      <div
+        ref={containerRef}
         className="relative transition-transform duration-100"
         style={{ transform: `rotate(${config.manualRotation}rad)` }}
       >
@@ -326,13 +328,13 @@ export function WheelCanvas({
           onContextMenu={handleContextMenu}
         />
       </div>
-      <div 
-        className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10" 
-        style={{ 
+      <div
+        className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10"
+        style={{
           borderLeft: '60px solid transparent',
           borderRight: '60px solid transparent',
           borderBottom: '120px solid #000',
-        }} 
+        }}
       />
       {isRecording && recordingProgress > 0 && (
         <div className="absolute top-4 right-4 bg-black/80 text-white px-4 py-2 rounded-md">
@@ -340,9 +342,9 @@ export function WheelCanvas({
         </div>
       )}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent 
+        <DialogContent
           className="absolute overflow-y-auto p-6 bg-white rounded-lg shadow-lg"
-          style={{ 
+          style={{
             width: '320px',
             maxHeight: '80vh',
             top: dialogPosition.y,
@@ -363,12 +365,14 @@ export function WheelCanvas({
             }
           }}
         >
-          <DialogTitle className="text-lg font-semibold dialog-header cursor-grab active:cursor-grabbing">
-            Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
-          </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground mb-4">
-            Customize the appearance and text of this wheel slice.
-          </DialogDescription>
+          <DialogHeader> {/* Added DialogHeader */}
+            <DialogTitle className="text-lg font-semibold dialog-header cursor-grab active:cursor-grabbing">
+              Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
+            </DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground mb-4">
+              Customize the appearance and text of this wheel slice.
+            </DialogDescription>
+          </DialogHeader> {/* DialogHeader closes here */}
           <DialogClose className="absolute right-4 top-4 opacity-70 hover:opacity-100">
             <X className="h-4 w-4" />
           </DialogClose>
