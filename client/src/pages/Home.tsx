@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { WheelCanvas } from "../components/WheelCanvas";
 import { SidePanel } from "../components/SidePanel";
 import { FileControls } from "../components/FileControls";
