@@ -247,7 +247,7 @@ export function getSliceAtPoint(
 }
 
 export function spinWheel(elapsed: number, config: WheelConfig): number {
-  const { spinSpeed, spinDuration, startRamp, endRamp } = config;
+  const { spinSpeed, spinDuration, startRamp, endRamp, slices } = config;
   
   // Calculate rotation based on time
   let progress = elapsed / spinDuration;
@@ -262,5 +262,14 @@ export function spinWheel(elapsed: number, config: WheelConfig): number {
     speed *= timeLeft / endRamp;
   }
 
-  return (progress * speed * Math.PI * 20) % (Math.PI * 2);
+  // Calculate base rotation
+  const baseRotation = progress * speed * Math.PI * 20;
+  
+  // Calculate slice size and adjust to land on center
+  const sliceSize = (2 * Math.PI) / slices;
+  const sliceCenterOffset = sliceSize / 2;
+  
+  // Round to nearest slice center
+  const rotations = Math.floor(baseRotation / sliceSize);
+  return (rotations * sliceSize + sliceCenterOffset) % (Math.PI * 2);
 }
