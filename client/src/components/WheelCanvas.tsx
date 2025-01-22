@@ -378,7 +378,6 @@ export function WheelCanvas({
             userSelect: 'none',
             zIndex: 50
           }}
-          aria-describedby="dialog-description"  {/* Added aria-describedby */}
           onMouseDown={(e) => {
             if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.dialog-header')) {
               setIsDragging(true);
@@ -394,7 +393,7 @@ export function WheelCanvas({
             <DialogTitle className="text-lg font-semibold dialog-header cursor-grab active:cursor-grabbing">
               Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
             </DialogTitle>
-            <DialogDescription id="dialog-description" className="text-sm text-muted-foreground mb-4">
+            <DialogDescription className="text-sm text-muted-foreground mb-4">
               Customize the appearance and text of this wheel slice.
             </DialogDescription>
           </DialogHeader> {/* DialogHeader closes here */}
