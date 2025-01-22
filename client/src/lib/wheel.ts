@@ -254,43 +254,42 @@ export function spinWheel(elapsed: number, config: WheelConfig): number {
   const decelerationPhase = endRamp;
   const steadyPhase = spinDuration - accelerationPhase - decelerationPhase;
 
+  // Add randomization to total rotation
+  // This ensures we don't always land on the same slice
+  const randomRotations = Math.floor(Math.random() * 3) + 4; // 4-6 full rotations
+  const targetRotation = randomRotations * 2 * Math.PI + Math.random() * 2 * Math.PI;
+
   let position = 0;
   let currentVelocity = 0;
 
   // Phase 1: Acceleration
   if (elapsed <= accelerationPhase) {
-    // Quadratic ease-in for smooth acceleration
     const progress = elapsed / accelerationPhase;
     currentVelocity = maxVelocity * (progress * progress);
-    position = (currentVelocity * elapsed) / 2;
+    position = (targetRotation * progress * progress) / 3;
   }
   // Phase 2: Max speed loop
   else if (elapsed <= accelerationPhase + steadyPhase) {
-    // Calculate position from acceleration phase
-    const accelerationDistance = (maxVelocity * accelerationPhase) / 2;
-
-    // Add steady phase distance
     const steadyElapsed = elapsed - accelerationPhase;
-    const steadyVelocity = maxVelocity * (1 + Math.sin(steadyElapsed * 4) * velocityVariation);
-    position = accelerationDistance + (steadyVelocity * steadyElapsed);
+    const steadyProgress = steadyElapsed / steadyPhase;
+
+    // Calculate base position including acceleration phase
+    position = (targetRotation / 3) + 
+               (targetRotation / 2) * steadyProgress +
+               maxVelocity * Math.sin(steadyElapsed * 4) * velocityVariation;
   }
   // Phase 3: Deceleration
   else {
-    // Calculate position from previous phases
-    const accelerationDistance = (maxVelocity * accelerationPhase) / 2;
-    const steadyDistance = maxVelocity * steadyPhase;
-
-    // Add deceleration phase
     const decelerationProgress = (elapsed - (accelerationPhase + steadyPhase)) / decelerationPhase;
     const t = 1 - decelerationProgress;
-    currentVelocity = maxVelocity * (t * t); // Quadratic ease-out
 
-    const decelerationDistance = maxVelocity * (1 - t * t * t) * decelerationPhase;
-    position = accelerationDistance + steadyDistance + decelerationDistance;
+    // Smooth out the final approach to target rotation
+    position = targetRotation - (targetRotation / 6) * (t * t);
+    currentVelocity = maxVelocity * (t * t);
   }
 
-  // Ensure we maintain minimum velocity until the very end
-  if (elapsed < spinDuration) {
+  // Ensure minimum velocity until near the end
+  if (elapsed < spinDuration - decelerationPhase / 2) {
     currentVelocity = Math.max(currentVelocity, minVelocity);
   }
 
