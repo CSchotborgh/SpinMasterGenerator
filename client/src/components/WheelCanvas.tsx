@@ -18,15 +18,6 @@ import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
 import {DialogHeader} from "@/components/ui/dialog"; // Assuming DialogHeader is defined here
 
-interface WheelHubProps {
-  config: WheelConfig;
-  onConfigChange: (config: WheelConfig) => void;
-}
-
-function WheelHub({ config, onConfigChange }: WheelHubProps) {
-  //Implementation for WheelHub would go here.  This is a placeholder.
-  return <div>Wheel Hub Placeholder</div>;
-}
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -337,8 +328,8 @@ export function WheelCanvas({
           onContextMenu={handleContextMenu}
         />
       </div>
-      <WheelHub config={config} onConfigChange={onConfigChange} />
-      <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10"
+      <div
+        className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10"
         style={{
           borderLeft: '60px solid transparent',
           borderRight: '60px solid transparent',
