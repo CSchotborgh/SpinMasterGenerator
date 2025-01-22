@@ -13,7 +13,7 @@ export function renderWheel(
   ctx.save();
   ctx.translate(circumference / 2, circumference / 2);
   ctx.rotate(rotation);
-
+  
   // Use stored slice sizes or calculate new ones if needed
   let sliceSizes = [...config.sliceSizes];
   
@@ -34,7 +34,7 @@ export function renderWheel(
     // Update the config with new slice sizes
     config.sliceSizes = sliceSizes;
   }
-
+  
   // Color schemes
   const colorSchemes = {
     default: [
@@ -68,11 +68,11 @@ export function renderWheel(
       '#1B4965', '#62B6CB', '#5FA8D3', '#CAE9FF'
     ]
   };
-
+  
   // Draw slices
   let currentAngle = 0;
   const schemeColors = colorSchemes[config.colorScheme || 'default'];
-
+  
   sliceSizes.forEach((size, i) => {
     const customColor = config.customColors[i];
     const color = customColor || schemeColors[i % schemeColors.length];
@@ -90,7 +90,7 @@ export function renderWheel(
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 2;
     ctx.stroke();
-
+    
     // Draw slice label
     const label = config.sliceLabels[i] || '';
     if (label) {
@@ -202,10 +202,10 @@ export function renderWheel(
       // Restore context
       ctx.restore();
     }
-
+    
     currentAngle += size;
   });
-
+  
   ctx.restore();
 }
 
@@ -217,19 +217,19 @@ export function getSliceAtPoint(
   const { circumference, slices } = config;
   const center = circumference / 2;
   const radius = center - 10;
-
+  
   // Convert click coordinates to be relative to wheel center
   const relativeX = x - center;
   const relativeY = y - center;
-
+  
   // Calculate distance from center
   const distance = Math.sqrt(relativeX * relativeX + relativeY * relativeY);
   if (distance > radius || distance < 15) return null;
-
+  
   // Calculate angle
   let angle = Math.atan2(relativeY, relativeX);
   if (angle < 0) angle += 2 * Math.PI;
-
+  
   // Convert angle to slice index
   const sliceSize = (2 * Math.PI) / slices;
   const sliceIndex = Math.floor(angle / sliceSize);
@@ -237,7 +237,7 @@ export function getSliceAtPoint(
   return sliceIndex;
 }
 
-export function spinWheel(elapsed: number, config: WheelConfig): number {
+export function spinWheel(elapsed: number, config: WheelConfig, isFirstSpin: boolean): number {
   const {
     spinSpeed,
     spinDuration,
@@ -248,8 +248,15 @@ export function spinWheel(elapsed: number, config: WheelConfig): number {
     minVelocity
   } = config;
 
-  // Constants for the three phases
   const maxVelocity = spinSpeed * 20;
+
+  // For subsequent spins, maintain constant max velocity
+  if (!isFirstSpin) {
+    const steadyVelocity = maxVelocity * (1 + Math.sin(elapsed * 4) * velocityVariation);
+    return steadyVelocity * elapsed;
+  }
+
+  // First spin: Use three-phase animation
   const accelerationPhase = startRamp;
   const decelerationPhase = endRamp;
   const steadyPhase = spinDuration - accelerationPhase - decelerationPhase;
@@ -257,39 +264,30 @@ export function spinWheel(elapsed: number, config: WheelConfig): number {
   let position = 0;
   let currentVelocity = 0;
 
-  // Phase 1: Acceleration
+  // Phase 1: Acceleration (only for first spin)
   if (elapsed <= accelerationPhase) {
-    // Quadratic ease-in for smooth acceleration
     const progress = elapsed / accelerationPhase;
     currentVelocity = maxVelocity * (progress * progress);
     position = (currentVelocity * elapsed) / 2;
   }
   // Phase 2: Max speed loop
   else if (elapsed <= accelerationPhase + steadyPhase) {
-    // Calculate position from acceleration phase
     const accelerationDistance = (maxVelocity * accelerationPhase) / 2;
-
-    // Add steady phase distance
     const steadyElapsed = elapsed - accelerationPhase;
     const steadyVelocity = maxVelocity * (1 + Math.sin(steadyElapsed * 4) * velocityVariation);
     position = accelerationDistance + (steadyVelocity * steadyElapsed);
   }
-  // Phase 3: Deceleration
+  // Phase 3: Deceleration (only for first spin)
   else {
-    // Calculate position from previous phases
     const accelerationDistance = (maxVelocity * accelerationPhase) / 2;
     const steadyDistance = maxVelocity * steadyPhase;
-
-    // Add deceleration phase
     const decelerationProgress = (elapsed - (accelerationPhase + steadyPhase)) / decelerationPhase;
     const t = 1 - decelerationProgress;
-    currentVelocity = maxVelocity * (t * t); // Quadratic ease-out
-
+    currentVelocity = maxVelocity * (t * t);
     const decelerationDistance = maxVelocity * (1 - t * t * t) * decelerationPhase;
     position = accelerationDistance + steadyDistance + decelerationDistance;
   }
 
-  // Ensure we maintain minimum velocity until the very end
   if (elapsed < spinDuration) {
     currentVelocity = Math.max(currentVelocity, minVelocity);
   }

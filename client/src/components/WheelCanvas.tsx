@@ -49,6 +49,8 @@ export function WheelCanvas({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [spinAngle, setSpinAngle] = useState(0);
+  const [isFirstSpin, setIsFirstSpin] = useState(true);
+  const lastRotationRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -62,10 +64,9 @@ export function WheelCanvas({
 
     renderWheel(ctx, config, 0);
 
-    const frameRate = 60; // Increased for smoother animation
+    const frameRate = 60;
     const frameInterval = 1000 / frameRate;
     let lastFrameTime = 0;
-    let finalRotation = 0;
 
     if (isSpinning) {
       let startTime = performance.now();
@@ -110,11 +111,12 @@ export function WheelCanvas({
         const elapsed = (currentTime - startTime) / 1000;
 
         if (elapsed >= config.spinDuration) {
-          // Store the final rotation instead of resetting
-          finalRotation = spinWheel(config.spinDuration, config);
+          // Store the final rotation
+          const finalRotation = spinWheel(config.spinDuration, config, isFirstSpin);
+          lastRotationRef.current = finalRotation;
           onSpinComplete();
+          setIsFirstSpin(false);
 
-          // Apply final rotation to container
           if (containerRef.current) {
             containerRef.current.style.transform = `rotate(${finalRotation}rad)`;
           }
@@ -123,7 +125,7 @@ export function WheelCanvas({
         }
 
         if (containerRef.current) {
-          const rotation = spinWheel(elapsed, config);
+          const rotation = spinWheel(elapsed, config, isFirstSpin);
           containerRef.current.style.transform = `rotate(${rotation}rad)`;
           setSpinAngle(rotation);
         }
@@ -236,7 +238,7 @@ export function WheelCanvas({
         gifRef.current.abort();
       }
     };
-  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast]);
+  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast, isFirstSpin]);
 
   useEffect(() => {
     if (!isSpinning && containerRef.current) {
