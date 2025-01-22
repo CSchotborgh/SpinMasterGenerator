@@ -206,15 +206,6 @@ export function renderWheel(
     currentAngle += size;
   });
 
-  // Draw center circle
-  ctx.beginPath();
-  ctx.arc(0, 0, 15, 0, Math.PI * 2);
-  ctx.fillStyle = '#333';
-  ctx.fill();
-  ctx.strokeStyle = '#000';
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
   ctx.restore();
 }
 
@@ -251,18 +242,18 @@ export function spinWheel(elapsed: number, config: WheelConfig): number {
   
   // Physics constants
   const initialVelocity = spinSpeed * 20 * (1 + Math.random() * 0.2); // Random initial velocity
-  const friction = 3.5; // Friction coefficient
-  const minVelocity = 0.1; // Minimum velocity before stopping
+  const friction = config.friction || 3.5; // Use config friction
+  const minVelocity = config.minVelocity || 0.1;
   
-  // Calculate angular velocity using physics
-  const velocity = Math.max(
-    initialVelocity * Math.exp(-friction * elapsed),
-    minVelocity
-  );
+  // Ensure minimum of 2 full rotations (4π radians) plus random extra
+  const minRotations = 2 * Math.PI * 2; // Minimum 2 rotations
+  const extraRotations = Math.random() * Math.PI * 2; // Up to 1 extra rotation
   
-  // Calculate angular position using integration
-  const position = initialVelocity * (1 - Math.exp(-friction * elapsed)) / friction;
+  // Calculate base position with physics
+  const basePosition = initialVelocity * (1 - Math.exp(-friction * elapsed)) / friction;
   
-  // Normalize to 2π range
-  return position % (Math.PI * 2);
+  // Ensure minimum rotation is met while preserving physics-based slowdown
+  const position = Math.max(basePosition, minRotations + extraRotations * (1 - elapsed / spinDuration));
+  
+  return position;
 }
