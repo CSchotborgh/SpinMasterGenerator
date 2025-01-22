@@ -59,7 +59,7 @@ export default function Home() {
       a.href = url;
       a.download = `wheel-animation-${timestamp}.gif`;
       document.body.appendChild(a);
-      
+
       // Use setTimeout to ensure the download triggers after the blob is ready
       setTimeout(() => {
         a.click();
@@ -82,29 +82,31 @@ export default function Home() {
       <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
         Game Wheel Generator
       </h1>
-      
+
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6">
-        <Card className="w-full max-w-3xl p-6 flex items-center justify-center">
-          <WheelCanvas 
-            config={config} 
+        <div className="flex flex-col items-center gap-8">
+          <Card className="w-full max-w-3xl p-6 flex items-center justify-center">
+            <WheelCanvas 
+              config={config} 
+              isSpinning={isSpinning}
+              isRecording={isRecording}
+              onSpinComplete={() => setIsSpinning(false)}
+              onConfigChange={setConfig}
+              onRecordingComplete={handleRecordingComplete}
+            />
+          </Card>
+
+          <SidePanel
+            config={config}
+            onConfigChange={setConfig}
+            onSpin={() => setIsSpinning(true)}
             isSpinning={isSpinning}
             isRecording={isRecording}
-            onSpinComplete={() => setIsSpinning(false)}
-            onConfigChange={setConfig}
-            onRecordingComplete={handleRecordingComplete}
+            onStartRecording={() => setIsRecording(true)}
+            onStopRecording={() => setIsRecording(false)}
           />
-        </Card>
-        
-        <SidePanel
-          config={config}
-          onConfigChange={setConfig}
-          onSpin={() => setIsSpinning(true)}
-          isSpinning={isSpinning}
-          isRecording={isRecording}
-          onStartRecording={() => setIsRecording(true)}
-          onStopRecording={() => setIsRecording(false)}
-        />
         </div>
       </div>
+    </div>
   );
 }
