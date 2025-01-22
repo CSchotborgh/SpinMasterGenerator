@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { WheelCanvas } from "../components/WheelCanvas";
 import { SidePanel } from "../components/SidePanel";
+import { FileControls } from "../components/FileControls";
 import { useState } from "react";
 
 export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome' | 'sunset' | 'ocean';
