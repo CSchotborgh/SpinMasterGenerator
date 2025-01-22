@@ -179,6 +179,36 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
           />
         </div>
 
+        <div className="space-y-2">
+          <Label>Hub Size ({config.hubSize}px)</Label>
+          <Slider
+            value={[config.hubSize]}
+            onValueChange={([v]) => updateConfig("hubSize", v)}
+            min={50}
+            max={200}
+            step={10}
+            disabled={disabled}
+          />
+          <div className="mt-2">
+            <Label>Hub Image</Label>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    updateConfig("hubImage", reader.result);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              disabled={disabled}
+            />
+          </div>
+        </div>
+
         <Button 
           className="w-full mt-4" 
           size="lg"
