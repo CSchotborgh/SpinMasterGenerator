@@ -101,7 +101,7 @@ export function WheelCanvas({
 
           setTimeout(() => {
             onRecordingComplete(blob);
-            
+
             toast({
               title: "Download Ready",
               description: "Your animation has been downloaded",
@@ -127,7 +127,7 @@ export function WheelCanvas({
 
       const animate = (currentTime: number) => {
         const elapsed = (currentTime - startTime) / 1000;
-        
+
         if (elapsed >= config.spinDuration) {
           onSpinComplete();
           renderWheel(ctx, config, 0);
@@ -158,7 +158,7 @@ export function WheelCanvas({
       // Handle recording completion when stopping
       if (isRecording && framesRef.current.length > 0 && !isProcessing) {
         setIsProcessing(true);
-        
+
         toast({
           title: "Processing Recording",
           description: "Generating GIF animation...",
@@ -190,9 +190,9 @@ export function WheelCanvas({
             setIsProcessing(false);
             setRecordingProgress(0);
             framesRef.current = [];
-            
+
             onRecordingComplete(blob);
-            
+
             // Clean up GIF instance
             if (gifRef.current) {
               gifRef.current.abort();
@@ -201,28 +201,28 @@ export function WheelCanvas({
           });
 
           console.log(`Processing ${framesRef.current.length} frames...`);
-          
+
           // Create an offscreen canvas for frame processing
           const offscreenCanvas = document.createElement('canvas');
           offscreenCanvas.width = canvas.width;
           offscreenCanvas.height = canvas.height;
           const offscreenCtx = offscreenCanvas.getContext('2d');
-          
+
           if (!offscreenCtx) {
             throw new Error('Failed to get offscreen canvas context');
           }
-          
+
           // Process frames
           for (let i = 0; i < framesRef.current.length; i++) {
             const frame = framesRef.current[i];
             offscreenCtx.putImageData(frame, 0, 0);
-            
+
             // Add frame to GIF with proper delay
             gifRef.current?.addFrame(offscreenCanvas, {
               delay: frameInterval,
               copy: true
             });
-            
+
             // Log progress
             if (i % 10 === 0) {
               console.log(`Processed ${i + 1}/${framesRef.current.length} frames`);
@@ -231,20 +231,20 @@ export function WheelCanvas({
 
           console.log('Starting GIF render...');
           gifRef.current?.render();
-          
+
         } catch (error) {
           console.error('Detailed error in frame processing:', error);
           setIsProcessing(false);
           setRecordingProgress(0);
           framesRef.current = [];
-          
+
           toast({
             title: "Recording Error",
             description: `Failed to process animation frames: ${error instanceof Error ? error.message : 'Unknown error'}`,
             variant: "destructive",
             duration: 5000,
           });
-          
+
           // Clean up GIF instance on error
           if (gifRef.current) {
             gifRef.current.abort();
@@ -267,7 +267,7 @@ export function WheelCanvas({
     const rect = canvas.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
+
     const sliceIndex = getSliceAtPoint(x, y, config);
     if (sliceIndex !== null) {
       setSelectedSlice(sliceIndex);
@@ -281,14 +281,14 @@ export function WheelCanvas({
       if (isDragging) {
         const x = e.clientX - dragOffset.x;
         const y = e.clientY - dragOffset.y;
-        
+
         // Keep dialog within viewport bounds
         const dialog = document.querySelector('[role="dialog"]');
         if (dialog) {
           const bounds = dialog.getBoundingClientRect();
           const maxX = window.innerWidth - bounds.width;
           const maxY = window.innerHeight - bounds.height;
-          
+
           setDialogPosition({
             x: Math.min(Math.max(x, 0), maxX),
             y: Math.min(Math.max(y, 0), maxY)
@@ -314,7 +314,7 @@ export function WheelCanvas({
 
   const handleColorChange = (color: string) => {
     if (selectedSlice === null) return;
-    
+
     const newCustomColors = [...config.customColors];
     newCustomColors[selectedSlice] = color;
     onConfigChange({ ...config, customColors: newCustomColors });
@@ -322,7 +322,7 @@ export function WheelCanvas({
 
   const handleLabelChange = (label: string) => {
     if (selectedSlice === null) return;
-    
+
     const newSliceLabels = [...config.sliceLabels];
     newSliceLabels[selectedSlice] = label;
     onConfigChange({
@@ -334,7 +334,7 @@ export function WheelCanvas({
 
   const handleTextRotation = (degree: number) => {
     if (selectedSlice === null) return;
-    
+
     const newTextRotations = [...config.textRotations];
     newTextRotations[selectedSlice] = degree;
     onConfigChange({ ...config, textRotations: newTextRotations });
@@ -342,7 +342,7 @@ export function WheelCanvas({
 
   const handleVerticalTextToggle = (checked: boolean) => {
     if (selectedSlice === null) return;
-    
+
     const newTextVertical = [...config.textVertical];
     newTextVertical[selectedSlice] = checked;
     onConfigChange({ ...config, textVertical: newTextVertical });
