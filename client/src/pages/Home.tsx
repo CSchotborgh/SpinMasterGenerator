@@ -85,7 +85,7 @@ export default function Home() {
 
       <div className="flex flex-col lg:flex-row items-center justify-center gap-6">
         <div className="flex flex-col items-center gap-8">
-          <Card className="w-full max-w-3xl p-6 flex items-center justify-center">
+          <Card className="w-full max-w-3xl p-6 flex items-center justify-center flex-col gap-6">
             <WheelCanvas 
               config={config} 
               isSpinning={isSpinning}
@@ -94,6 +94,14 @@ export default function Home() {
               onConfigChange={setConfig}
               onRecordingComplete={handleRecordingComplete}
             />
+            <Button
+              size="lg"
+              className="w-[200px]"
+              onClick={() => setIsSpinning(true)}
+              disabled={isSpinning}
+            >
+              Spin Wheel
+            </Button>
           </Card>
 
           <SidePanel
