@@ -29,6 +29,9 @@ export interface WheelConfig {
   textFontStyle: ('proportional' | 'monospace')[];
   textKerning: number[];
   verticalKerning: number[];
+  // Add hub-related properties
+  hubSize: number;
+  hubImage: string | null;
 }
 
 export default function Home() {
@@ -50,10 +53,13 @@ export default function Home() {
     textRotations: Array(8).fill(0),
     textVertical: Array(8).fill(false),
     sliceSizes: Array(8).fill(2 * Math.PI / 8),
-    fontSize: Array(8).fill(0), // 0 means auto-calculated based on wheel size
-    textFontStyle: Array(8).fill('proportional'), // Default to proportional font
-    textKerning: Array(8).fill(0), // Default kerning value
-    verticalKerning: Array(8).fill(0), // Default vertical kerning value
+    fontSize: Array(8).fill(0),
+    textFontStyle: Array(8).fill('proportional'),
+    textKerning: Array(8).fill(0),
+    verticalKerning: Array(8).fill(0),
+    // Initialize hub properties
+    hubSize: 50, // Default size in pixels
+    hubImage: null,
   });
 
   const [isSpinning, setIsSpinning] = useState(false);

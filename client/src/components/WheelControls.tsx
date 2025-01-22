@@ -2,6 +2,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input"; // Added import for Input component
 import type { WheelConfig, ColorScheme } from "../pages/Home";
 import {
   Select,
@@ -20,14 +21,14 @@ interface WheelControlsProps {
 }
 
 export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpinning }: WheelControlsProps) {
-  const updateConfig = (key: keyof WheelConfig, value: number | boolean | string) => {
+  const updateConfig = (key: keyof WheelConfig, value: number | boolean | string | null) => {
     onConfigChange({ ...config, [key]: value });
   };
 
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-semibold mb-4">Wheel Controls</h2>
-      
+
       <div className="space-y-4">
         <div className="space-y-2">
           <Label>Number of Slices ({config.slices})</Label>
@@ -168,7 +169,7 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
         </div>
 
         <div className="space-y-2">
-          <Label>Manual Rotation ({Math.round(config.manualRotation * (180/Math.PI))}°)</Label>
+          <Label>Manual Rotation ({Math.round(config.manualRotation * (180 / Math.PI))}°)</Label>
           <Slider
             value={[config.manualRotation]}
             onValueChange={([v]) => updateConfig("manualRotation", v)}
@@ -179,8 +180,51 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
           />
         </div>
 
-        <Button 
-          className="w-full mt-4" 
+        <div className="space-y-2">
+          <Label>Hub Size ({config.hubSize}px)</Label>
+          <Slider
+            value={[config.hubSize]}
+            onValueChange={([v]) => updateConfig("hubSize", v)}
+            min={20}
+            max={200}
+            step={5}
+            disabled={disabled}
+          />
+        </div>
+
+        <div className="mt-2">
+          <Label>Hub Image</Label>
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  updateConfig("hubImage", reader.result as string);
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+            className="mt-1"
+            disabled={disabled}
+          />
+          {config.hubImage && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => updateConfig("hubImage", null)}
+              className="mt-2"
+              disabled={disabled}
+            >
+              Remove Image
+            </Button>
+          )}
+        </div>
+
+        <Button
+          className="w-full mt-4"
           size="lg"
           onClick={onSpin}
           disabled={disabled}

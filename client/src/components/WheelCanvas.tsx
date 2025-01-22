@@ -327,6 +327,24 @@ export function WheelCanvas({
           className="max-w-full h-auto shadow-lg rounded-full"
           onContextMenu={handleContextMenu}
         />
+        {/* Add the hub */}
+        <div
+          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden z-10 shadow-lg bg-white"
+          style={{
+            width: `${config.hubSize}px`,
+            height: `${config.hubSize}px`,
+          }}
+        >
+          {config.hubImage ? (
+            <img
+              src={config.hubImage}
+              alt="Wheel Hub"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full bg-primary/10" />
+          )}
+        </div>
       </div>
       <div
         className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10"
