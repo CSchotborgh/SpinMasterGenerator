@@ -192,6 +192,15 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
           />
         </div>
 
+        <div className="flex items-center space-x-2">
+          <Switch
+            checked={config.hubSpinsWithWheel}
+            onCheckedChange={(v) => updateConfig("hubSpinsWithWheel", v)}
+            disabled={disabled}
+          />
+          <Label>Hub Spins with Wheel</Label>
+        </div>
+
         <div className="mt-2">
           <Label>Hub Image</Label>
           <Input

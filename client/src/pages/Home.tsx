@@ -4,6 +4,7 @@ import { WheelCanvas } from "../components/WheelCanvas";
 import { SidePanel } from "../components/SidePanel";
 import { FileControls } from "../components/FileControls";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome' | 'sunset' | 'ocean';
 
@@ -29,12 +30,15 @@ export interface WheelConfig {
   textFontStyle: ('proportional' | 'monospace')[];
   textKerning: number[];
   verticalKerning: number[];
-  // Add hub-related properties
+  // Hub-related properties
   hubSize: number;
   hubImage: string | null;
+  hubSpinsWithWheel: boolean;
 }
 
 export default function Home() {
+  const { toast } = useToast();
+
   const [config, setConfig] = useState<WheelConfig>({
     slices: 8,
     circumference: 500,
@@ -58,8 +62,9 @@ export default function Home() {
     textKerning: Array(8).fill(0),
     verticalKerning: Array(8).fill(0),
     // Initialize hub properties
-    hubSize: 50, // Default size in pixels
+    hubSize: 50,
     hubImage: null,
+    hubSpinsWithWheel: true, // Default to spinning with wheel
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
@@ -75,7 +80,6 @@ export default function Home() {
       a.download = `wheel-animation-${timestamp}.gif`;
       document.body.appendChild(a);
 
-      // Use setTimeout to ensure the download triggers after the blob is ready
       setTimeout(() => {
         a.click();
         document.body.removeChild(a);

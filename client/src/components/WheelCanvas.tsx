@@ -16,8 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
-import {DialogHeader} from "@/components/ui/dialog"; // Assuming DialogHeader is defined here
-
+import {DialogHeader} from "@/components/ui/dialog";
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -49,6 +48,8 @@ export function WheelCanvas({
   const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [spinAngle, setSpinAngle] = useState(0); // Added state for spin angle
+
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -123,6 +124,7 @@ export function WheelCanvas({
         if (containerRef.current) {
           const rotation = spinWheel(elapsed, config);
           containerRef.current.style.transform = `rotate(${rotation}rad)`;
+          setSpinAngle(rotation); // Update spinAngle
         }
 
         // Capture frame for recording
@@ -329,10 +331,14 @@ export function WheelCanvas({
         />
         {/* Add the hub */}
         <div
-          className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full overflow-hidden z-10 shadow-lg bg-white"
+          className="absolute top-1/2 left-1/2 rounded-full overflow-hidden z-10 shadow-lg bg-white"
           style={{
             width: `${config.hubSize}px`,
             height: `${config.hubSize}px`,
+            transform: config.hubSpinsWithWheel
+              ? 'translate(-50%, -50%)'
+              : `translate(-50%, -50%) rotate(${-config.manualRotation}rad)`, // Counter-rotate when not spinning with wheel
+            transition: 'transform 0.1s',
           }}
         >
           {config.hubImage ? (
@@ -340,6 +346,13 @@ export function WheelCanvas({
               src={config.hubImage}
               alt="Wheel Hub"
               className="w-full h-full object-cover"
+              style={{
+                transform: config.hubSpinsWithWheel
+                  ? 'none'
+                  : isSpinning
+                    ? `rotate(${-spinAngle}rad)` // Counter-rotate during spin
+                    : 'none',
+              }}
             />
           ) : (
             <div className="w-full h-full bg-primary/10" />
