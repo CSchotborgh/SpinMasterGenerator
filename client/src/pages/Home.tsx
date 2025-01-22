@@ -83,8 +83,8 @@ export default function Home() {
         Game Wheel Generator
       </h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2 p-6">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-6">
+        <Card className="w-full max-w-3xl p-6 flex items-center justify-center">
           <WheelCanvas 
             config={config} 
             isSpinning={isSpinning}
