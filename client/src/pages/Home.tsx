@@ -104,14 +104,6 @@ export default function Home() {
           onStartRecording={() => setIsRecording(true)}
           onStopRecording={() => setIsRecording(false)}
         />
-
-          <Card className="p-6">
-            <FileControls
-              config={config}
-              onConfigChange={setConfig}
-              disabled={isSpinning}
-            />
-          </Card>
         </div>
       </div>
   );
