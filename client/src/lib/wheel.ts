@@ -247,31 +247,22 @@ export function getSliceAtPoint(
 }
 
 export function spinWheel(elapsed: number, config: WheelConfig): number {
-  const { spinSpeed, spinDuration, startRamp, endRamp } = config;
+  const { spinSpeed, spinDuration } = config;
   
-  // Calculate rotation based on time
-  let progress = elapsed / spinDuration;
-  if (progress > 1) progress = 1;
-
-  // Apply easing for start and end ramps with randomization
-  let speed = spinSpeed;
-  if (elapsed < startRamp) {
-    // Initial ramp up
-    speed *= elapsed / startRamp;
-  } else if (elapsed > spinDuration - endRamp) {
-    // Randomized ramp down
-    const timeLeft = spinDuration - elapsed;
-    const randomFactor = 0.5 + Math.random(); // Random factor between 0.5 and 1.5
-    speed *= (timeLeft / endRamp) * randomFactor;
-    
-    // Ensure smooth landing by gradually reducing randomness near the end
-    const endProgress = 1 - (timeLeft / endRamp);
-    if (endProgress > 0.8) {
-      // Smooth out the last 20% of the ramp
-      const smoothFactor = (1 - endProgress) * 5; // 1 to 0 in last 20%
-      speed *= smoothFactor;
-    }
-  }
-
-  return (progress * speed * Math.PI * 20) % (Math.PI * 2);
+  // Physics constants
+  const initialVelocity = spinSpeed * 20 * (1 + Math.random() * 0.2); // Random initial velocity
+  const friction = 3.5; // Friction coefficient
+  const minVelocity = 0.1; // Minimum velocity before stopping
+  
+  // Calculate angular velocity using physics
+  const velocity = Math.max(
+    initialVelocity * Math.exp(-friction * elapsed),
+    minVelocity
+  );
+  
+  // Calculate angular position using integration
+  const position = initialVelocity * (1 - Math.exp(-friction * elapsed)) / friction;
+  
+  // Normalize to 2π range
+  return position % (Math.PI * 2);
 }
