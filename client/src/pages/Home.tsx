@@ -15,6 +15,9 @@ export interface WheelConfig {
   spinDuration: number;
   startRamp: number;
   endRamp: number;
+  friction: number;
+  velocityVariation: number;
+  minVelocity: number;
   colorScheme: ColorScheme;
   customColors: (string | null)[];
   sliceLabels: string[];
@@ -36,6 +39,9 @@ export default function Home() {
     spinDuration: 5,
     startRamp: 1,
     endRamp: 1,
+    friction: 3.5,
+    velocityVariation: 0.2,
+    minVelocity: 0.1,
     colorScheme: 'default',
     customColors: Array(8).fill(null),
     sliceLabels: Array(8).fill(''),

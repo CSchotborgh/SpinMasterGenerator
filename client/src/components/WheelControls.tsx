@@ -130,6 +130,42 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled }: Whee
           </Select>
         </div>
 
+        <div className="space-y-2">
+          <Label>Friction ({config.friction})</Label>
+          <Slider
+            value={[config.friction]}
+            onValueChange={([v]) => updateConfig("friction", v)}
+            min={0.5}
+            max={8}
+            step={0.1}
+            disabled={disabled}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Initial Velocity Variation ({config.velocityVariation})</Label>
+          <Slider
+            value={[config.velocityVariation]}
+            onValueChange={([v]) => updateConfig("velocityVariation", v)}
+            min={0}
+            max={0.5}
+            step={0.01}
+            disabled={disabled}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label>Minimum Velocity ({config.minVelocity})</Label>
+          <Slider
+            value={[config.minVelocity]}
+            onValueChange={([v]) => updateConfig("minVelocity", v)}
+            min={0.01}
+            max={1}
+            step={0.01}
+            disabled={disabled}
+          />
+        </div>
+
         <Button 
           className="w-full mt-4" 
           size="lg"
