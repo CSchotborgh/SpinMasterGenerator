@@ -48,8 +48,7 @@ export function WheelCanvas({
   const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [spinAngle, setSpinAngle] = useState(config.manualRotation);
-  const lastSpinAngleRef = useRef(config.manualRotation);
+  const [spinAngle, setSpinAngle] = useState(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -66,7 +65,7 @@ export function WheelCanvas({
     const frameRate = 60; // Increased for smoother animation
     const frameInterval = 1000 / frameRate;
     let lastFrameTime = 0;
-
+    let finalRotation = 0;
 
     if (isSpinning) {
       let startTime = performance.now();
@@ -111,24 +110,22 @@ export function WheelCanvas({
         const elapsed = (currentTime - startTime) / 1000;
 
         if (elapsed >= config.spinDuration) {
-          const finalRotation = lastSpinAngleRef.current + spinWheel(config.spinDuration, config);
-          lastSpinAngleRef.current = finalRotation;
-          setSpinAngle(finalRotation);
-
-          onConfigChange({
-            ...config,
-            manualRotation: finalRotation
-          });
-
+          // Store the final rotation instead of resetting
+          finalRotation = spinWheel(config.spinDuration, config);
           onSpinComplete();
+
+          // Apply final rotation to container
+          if (containerRef.current) {
+            containerRef.current.style.transform = `rotate(${finalRotation}rad)`;
+          }
+          setSpinAngle(finalRotation);
           return;
         }
 
-        const currentRotation = lastSpinAngleRef.current + spinWheel(elapsed, config);
-        setSpinAngle(currentRotation);
-
         if (containerRef.current) {
-          containerRef.current.style.transform = `rotate(${currentRotation}rad)`;
+          const rotation = spinWheel(elapsed, config);
+          containerRef.current.style.transform = `rotate(${rotation}rad)`;
+          setSpinAngle(rotation);
         }
 
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
@@ -239,12 +236,11 @@ export function WheelCanvas({
         gifRef.current.abort();
       }
     };
-  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast, onConfigChange]);
+  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast]);
 
   useEffect(() => {
-    if (!isSpinning) {
-      lastSpinAngleRef.current = config.manualRotation;
-      setSpinAngle(config.manualRotation);
+    if (!isSpinning && containerRef.current) {
+      containerRef.current.style.transform = `rotate(${config.manualRotation}rad)`;
     }
   }, [config.manualRotation, isSpinning]);
 
@@ -314,7 +310,7 @@ export function WheelCanvas({
       <div
         ref={containerRef}
         className="relative transition-transform duration-100 hover:scale-102"
-        style={{ transform: `rotate(${spinAngle}rad)` }}
+        style={{ transform: `rotate(${isSpinning ? spinAngle : config.manualRotation}rad)` }}
       >
         <canvas
           ref={canvasRef}
