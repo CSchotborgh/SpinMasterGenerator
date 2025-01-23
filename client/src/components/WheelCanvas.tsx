@@ -306,10 +306,10 @@ export function WheelCanvas({
   };
 
   return (
-    <div className="flex justify-center items-center relative">
+    <div className="flex justify-center items-center relative wheel-container">
       <div
         ref={containerRef}
-        className="relative transition-transform duration-100"
+        className="relative transition-transform duration-100 hover:scale-102"
         style={{ transform: `rotate(${config.manualRotation}rad)` }}
       >
         <canvas
@@ -318,7 +318,7 @@ export function WheelCanvas({
           onContextMenu={handleContextMenu}
         />
         <div
-          className="absolute top-1/2 left-1/2 rounded-full overflow-hidden z-10 shadow-lg bg-white"
+          className="absolute top-1/2 left-1/2 rounded-full overflow-hidden z-10 shadow-lg bg-gradient-to-br from-slate-700 to-slate-900 hub-container"
           style={{
             width: `${config.hubSize}px`,
             height: `${config.hubSize}px`,
@@ -340,11 +340,12 @@ export function WheelCanvas({
         </div>
       </div>
       <div
-        className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10"
+        className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-1/2 w-0 h-0 z-10 wheel-pointer"
         style={{
           borderLeft: '60px solid transparent',
           borderRight: '60px solid transparent',
-          borderBottom: '120px solid #000',
+          borderBottom: '120px solid rgba(255,255,255,0.15)',
+          filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.2))',
         }}
       />
       {isRecording && recordingProgress > 0 && (

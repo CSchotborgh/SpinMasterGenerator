@@ -8,7 +8,27 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply font-sans antialiased bg-gradient-to-br from-slate-900 to-slate-800 text-foreground min-h-screen;
+  }
+
+  .wheel-container {
+    @apply bg-black/20 backdrop-blur-lg rounded-3xl p-8 shadow-xl;
+  }
+
+  .control-panel {
+    @apply bg-black/30 backdrop-blur-lg rounded-2xl p-6 shadow-lg;
+  }
+
+  .slice-dialog {
+    @apply bg-black/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+  }
+
+  .hub-container {
+    @apply shadow-lg ring-2 ring-white/20 transition-all duration-300;
+  }
+
+  .wheel-pointer {
+    @apply animate-pulse;
   }
 }
 /* Remove slide-in animation as it's no longer needed */
