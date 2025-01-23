@@ -183,6 +183,11 @@ export function WheelCanvas({
             sliceId: sliceIdsRef.current[landedSliceIndex],
             sliceLabel: config.sliceLabels[landedSliceIndex] || `Slice ${landedSliceIndex + 1}`,
             rotation: finalRotation,
+            settings: {
+              rotation: finalRotation,
+              velocity: config.spinSpeed,
+              duration: config.spinDuration
+            }
           };
 
           onSpinComplete(historyEntry);

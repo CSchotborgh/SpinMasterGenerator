@@ -58,6 +58,12 @@ export function SpinHistory({ history, onClearHistory, onExportHistory }: SpinHi
                     ID: {entry.sliceId.slice(0, 8)}
                   </span>
                 </div>
+                {entry.settings && (
+                  <div className="text-xs text-muted-foreground mt-1">
+                    <div>Spin Duration: {entry.settings.duration}s</div>
+                    <div>Speed: {entry.settings.velocity}x</div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
