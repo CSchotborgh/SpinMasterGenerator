@@ -433,6 +433,7 @@ export function WheelCanvas({
             userSelect: 'none',
             zIndex: 50
           }}
+          aria-describedby="slice-settings-desc"
           onMouseDown={(e) => {
             if (e.target === e.currentTarget || (e.target as HTMLElement).closest('.dialog-header')) {
               setIsDragging(true);
@@ -445,10 +446,10 @@ export function WheelCanvas({
           }}
         >
           <DialogHeader className="dialog-header cursor-grab active:cursor-grabbing">
-            <DialogTitle>
+            <DialogTitle id="slice-settings-title">
               Slice {selectedSlice !== null ? selectedSlice + 1 : ''} Settings
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription id="slice-settings-desc">
               Customize the appearance and text of this wheel slice. You can adjust colors, labels, and text orientation.
             </DialogDescription>
           </DialogHeader>
