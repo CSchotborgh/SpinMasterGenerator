@@ -51,8 +51,8 @@ export function SpinHistory({ history, onClearHistory, onExportHistory }: SpinHi
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
-                    Slice {entry.selectedSlice + 1}
+                  <span className="text-sm text-muted-foreground" aria-describedby="slice-settings-desc">
+                    {`Slice ${entry.selectedSlice + 1} Settings`}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     ID: {entry.sliceId.slice(0, 8)}

@@ -178,11 +178,17 @@ export function WheelCanvas({
             timestamp: new Date(),
             selectedSlice: selectedSlice ?? 0,
             sliceId: sliceIdsRef.current[selectedSlice ?? 0],
-            sliceLabel: config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`,
+            sliceLabel: `${config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`} (${selectedSlice !== null ?
+              `Slice ${selectedSlice + 1} Settings` : 'Unknown Slice'})`,
             rotation: finalRotation,
           };
 
           onSpinComplete(historyEntry);
+          toast({
+            title: "Spin Complete!",
+            description: `Landed on: ${historyEntry.sliceLabel}`,
+            duration: 3000,
+          });
           return;
         }
 
