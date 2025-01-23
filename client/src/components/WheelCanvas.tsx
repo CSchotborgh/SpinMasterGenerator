@@ -17,12 +17,15 @@ import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
+import type { SpinHistoryEntry } from "../types/SpinHistory";
+import crypto from 'crypto';
+
 
 interface WheelCanvasProps {
   config: WheelConfig;
   isSpinning: boolean;
   isRecording: boolean;
-  onSpinComplete: () => void;
+  onSpinComplete: (result: SpinHistoryEntry) => void;
   onConfigChange: (config: WheelConfig) => void;
   onRecordingComplete: (gifBlob: Blob) => void;
 }
@@ -49,6 +52,7 @@ export function WheelCanvas({
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [spinAngle, setSpinAngle] = useState(0);
+  const lastSpinAngleRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -62,10 +66,9 @@ export function WheelCanvas({
 
     renderWheel(ctx, config, 0);
 
-    const frameRate = 60; // Increased for smoother animation
+    const frameRate = 60;
     const frameInterval = 1000 / frameRate;
     let lastFrameTime = 0;
-    let finalRotation = 0;
 
     if (isSpinning) {
       let startTime = performance.now();
@@ -110,22 +113,43 @@ export function WheelCanvas({
         const elapsed = (currentTime - startTime) / 1000;
 
         if (elapsed >= config.spinDuration) {
-          // Store the final rotation instead of resetting
-          finalRotation = spinWheel(config.spinDuration, config);
-          onSpinComplete();
-
-          // Apply final rotation to container
-          if (containerRef.current) {
-            containerRef.current.style.transform = `rotate(${finalRotation}rad)`;
-          }
+          const finalRotation = lastSpinAngleRef.current + spinWheel(config.spinDuration, config);
+          lastSpinAngleRef.current = finalRotation;
           setSpinAngle(finalRotation);
+
+          // Calculate which slice is selected at the end
+          const selectedSlice = getSliceAtPoint(
+            config.circumference / 2,
+            0,
+            {
+              ...config,
+              manualRotation: finalRotation
+            }
+          );
+
+          onConfigChange({
+            ...config,
+            manualRotation: finalRotation
+          });
+
+          // Create spin history entry
+          const historyEntry: SpinHistoryEntry = {
+            id: crypto.randomUUID(),
+            timestamp: new Date(),
+            selectedSlice: selectedSlice ?? 0,
+            sliceLabel: config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`,
+            rotation: finalRotation,
+          };
+
+          onSpinComplete(historyEntry);
           return;
         }
 
         if (containerRef.current) {
-          const rotation = spinWheel(elapsed, config);
+          const rotation = lastSpinAngleRef.current + spinWheel(elapsed, config);
           containerRef.current.style.transform = `rotate(${rotation}rad)`;
           setSpinAngle(rotation);
+          lastSpinAngleRef.current = rotation;
         }
 
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
@@ -236,7 +260,7 @@ export function WheelCanvas({
         gifRef.current.abort();
       }
     };
-  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast]);
+  }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast, onConfigChange]);
 
   useEffect(() => {
     if (!isSpinning && containerRef.current) {

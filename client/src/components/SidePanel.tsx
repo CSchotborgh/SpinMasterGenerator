@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
@@ -12,7 +11,9 @@ import { WheelControls } from "./WheelControls";
 import { TemplateControls } from "./TemplateControls";
 import { RecordingControls } from "./RecordingControls";
 import { FileControls } from "./FileControls";
+import { SpinHistory } from "./SpinHistory";
 import type { WheelConfig } from "../pages/Home";
+import type { SpinHistory as SpinHistoryType } from "../types/SpinHistory";
 
 interface SidePanelProps {
   config: WheelConfig;
@@ -22,6 +23,9 @@ interface SidePanelProps {
   isRecording: boolean;
   onStartRecording: () => void;
   onStopRecording: () => void;
+  spinHistory: SpinHistoryType;
+  onClearHistory: () => void;
+  onExportHistory: () => void;
 }
 
 export function SidePanel({
@@ -32,6 +36,9 @@ export function SidePanel({
   isRecording,
   onStartRecording,
   onStopRecording,
+  spinHistory,
+  onClearHistory,
+  onExportHistory,
 }: SidePanelProps) {
   return (
     <Sheet>
@@ -51,6 +58,17 @@ export function SidePanel({
                 onSpin={onSpin}
                 disabled={isSpinning}
                 isSpinning={isSpinning}
+              />
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="history">
+            <AccordionTrigger>Spin History</AccordionTrigger>
+            <AccordionContent>
+              <SpinHistory
+                history={spinHistory}
+                onClearHistory={onClearHistory}
+                onExportHistory={onExportHistory}
               />
             </AccordionContent>
           </AccordionItem>
