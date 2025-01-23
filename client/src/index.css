@@ -29,8 +29,25 @@
   }
 
   .wheel-pointer {
-    @apply animate-pulse;
+    position: relative;
     filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
+  }
+
+  .wheel-pointer::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    background: linear-gradient(45deg, #ff3d00, #00b4ff, #00ff88, #ff3d00);
+    background-size: 400% 400%;
+    animation: gradientFlow 4s linear infinite;
+    -webkit-mask: linear-gradient(transparent 0 0);
+            mask: linear-gradient(transparent 0 0);
+    filter: blur(8px);
+  }
+
+  @keyframes gradientFlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 400% 50%; }
   }
 }
 /* Remove slide-in animation as it's no longer needed */
