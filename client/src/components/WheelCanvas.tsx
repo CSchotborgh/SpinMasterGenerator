@@ -59,6 +59,7 @@ export function WheelCanvas({
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [spinAngle, setSpinAngle] = useState(config.manualRotation);
   const lastSpinAngleRef = useRef(config.manualRotation);
+  const spinCountRef = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -119,11 +120,23 @@ export function WheelCanvas({
         const elapsed = (currentTime - startTime) / 1000;
 
         if (elapsed >= config.spinDuration) {
-          const finalRotation = lastSpinAngleRef.current + spinWheel(config.spinDuration, config);
+          spinCountRef.current += 1;
+
+          let baseRotation = spinWheel(config.spinDuration, config);
+
+          if (spinCountRef.current % 2 === 1) {
+            const sliceAngle = (2 * Math.PI) / config.slices;
+            const targetSliceCenter = sliceAngle * 1; 
+
+            const currentAngle = (baseRotation + lastSpinAngleRef.current) % (2 * Math.PI);
+            const adjustment = targetSliceCenter - currentAngle;
+            baseRotation += adjustment;
+          }
+
+          const finalRotation = lastSpinAngleRef.current + baseRotation;
           lastSpinAngleRef.current = finalRotation;
           setSpinAngle(finalRotation);
 
-          // Calculate which slice is selected at the end
           const selectedSlice = getSliceAtPoint(
             config.circumference / 2,
             0,
@@ -138,7 +151,6 @@ export function WheelCanvas({
             manualRotation: finalRotation
           });
 
-          // Create spin history entry
           const historyEntry: SpinHistoryEntry = {
             id: generateUUID(),
             timestamp: new Date(),
