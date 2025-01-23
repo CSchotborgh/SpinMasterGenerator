@@ -72,6 +72,14 @@ export function WheelCanvas({
   const [spinAngle, setSpinAngle] = useState(config.manualRotation);
   const lastSpinAngleRef = useRef(config.manualRotation);
   const spinCountRef = useRef(0);
+  const sliceIdsRef = useRef<string[]>([]);
+
+  // Initialize slice IDs if not already set
+  useEffect(() => {
+    if (sliceIdsRef.current.length !== config.slices) {
+      sliceIdsRef.current = Array(config.slices).fill(null).map(() => generateUUID());
+    }
+  }, [config.slices]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -169,6 +177,7 @@ export function WheelCanvas({
             id: generateUUID(),
             timestamp: new Date(),
             selectedSlice: selectedSlice ?? 0,
+            sliceId: sliceIdsRef.current[selectedSlice ?? 0],
             sliceLabel: config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`,
             rotation: finalRotation,
           };

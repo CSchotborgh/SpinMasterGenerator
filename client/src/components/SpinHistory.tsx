@@ -33,7 +33,7 @@ export function SpinHistory({ history, onClearHistory, onExportHistory }: SpinHi
           </Button>
         </div>
       </div>
-      
+
       <ScrollArea className="h-[300px] rounded-md border p-4">
         {history.length === 0 ? (
           <p className="text-center text-muted-foreground">No spins recorded yet</p>
@@ -50,9 +50,14 @@ export function SpinHistory({ history, onClearHistory, onExportHistory }: SpinHi
                     {new Date(entry.timestamp).toLocaleTimeString()}
                   </span>
                 </div>
-                <span className="text-sm text-muted-foreground">
-                  Slice {entry.selectedSlice + 1}
-                </span>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">
+                    Slice {entry.selectedSlice + 1}
+                  </span>
+                  <span className="text-xs text-muted-foreground">
+                    ID: {entry.sliceId.slice(0, 8)}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
