@@ -35,6 +35,8 @@ export interface WheelConfig {
   hubSize: number;
   hubImage: string | null;
   hubSpinsWithWheel: boolean;
+  // Arrow marker properties
+  arrowRadius: number;
 }
 
 export default function Home() {
@@ -66,6 +68,7 @@ export default function Home() {
     hubSize: 50,
     hubImage: null,
     hubSpinsWithWheel: true,
+    arrowRadius: 0,
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
