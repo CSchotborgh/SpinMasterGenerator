@@ -24,11 +24,13 @@
   }
 
   .hub-container {
-    @apply shadow-lg ring-2 ring-white/20 transition-all duration-300;
+    @apply shadow-[0_0_25px_rgba(0,0,0,0.5)] ring-2 ring-white/20 transition-all duration-300;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
   }
 
   .wheel-pointer {
     @apply animate-pulse;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.6));
   }
 }
 /* Remove slide-in animation as it's no longer needed */
