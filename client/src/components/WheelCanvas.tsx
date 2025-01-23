@@ -344,8 +344,8 @@ export function WheelCanvas({
         style={{
           borderLeft: '60px solid transparent',
           borderRight: '60px solid transparent',
-          borderBottom: '120px solid rgba(255,255,255,0.15)',
-          filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.2))',
+          borderBottom: '120px solid rgba(255,255,255,0.8)',
+          filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.4))',
         }}
       />
       {isRecording && recordingProgress > 0 && (
