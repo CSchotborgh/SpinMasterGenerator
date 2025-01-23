@@ -164,21 +164,24 @@ export function WheelCanvas({
             manualRotation: finalRotation
           });
 
-          const selectedSlice = getSliceAtPoint(
-            config.circumference / 2,
-            0,
-            {
-              ...config,
-              manualRotation: finalRotation
-            }
-          );
+          // Calculate the actual landed slice based on final rotation
+          const finalRotationNormalized = finalRotation % (2 * Math.PI);
+          const landedSliceIndex = Math.floor(((2 * Math.PI - finalRotationNormalized) % (2 * Math.PI)) / sliceAngle);
+
+          console.log('Landed slice calculation:', {
+            finalRotation,
+            normalizedRotation: finalRotationNormalized,
+            sliceAngle,
+            landedSliceIndex,
+            sliceLabel: config.sliceLabels[landedSliceIndex]
+          });
 
           const historyEntry: SpinHistoryEntry = {
             id: generateUUID(),
             timestamp: new Date(),
-            selectedSlice: selectedSlice ?? 0,
-            sliceId: sliceIdsRef.current[selectedSlice ?? 0],
-            sliceLabel: config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`,
+            selectedSlice: landedSliceIndex,
+            sliceId: sliceIdsRef.current[landedSliceIndex],
+            sliceLabel: config.sliceLabels[landedSliceIndex] || `Slice ${landedSliceIndex + 1}`,
             rotation: finalRotation,
           };
 
