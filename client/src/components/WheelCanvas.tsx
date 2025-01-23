@@ -345,6 +345,7 @@ export function WheelCanvas({
           borderLeft: '60px solid transparent',
           borderRight: '60px solid transparent',
           borderBottom: '120px solid rgba(255,255,255,0.95)',
+          borderRadius: `${config.arrowRadius || 0}px`,
           filter: 'drop-shadow(0 0 10px rgba(255,255,255,0.6))',
         }}
       />

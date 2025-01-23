@@ -179,7 +179,16 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
             disabled={disabled || isSpinning}
           />
         </div>
-
+        <div className="space-y-2">
+            <Label>Arrow Marker Radius</Label>
+            <Slider
+              value={[config.arrowRadius || 0]}
+              onValueChange={([value]) => updateConfig("arrowRadius", value)}
+              max={60}
+              step={1}
+              className="py-2"
+            />
+          </div>
         <div className="space-y-2">
           <Label>Hub Size ({config.hubSize}px)</Label>
           <Slider
