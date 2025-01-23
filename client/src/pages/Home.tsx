@@ -5,6 +5,7 @@ import { SidePanel } from "../components/SidePanel";
 import { FileControls } from "../components/FileControls";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import type { SpinHistory as SpinHistoryType, SpinHistoryEntry } from "../types/SpinHistory";
 
 export type ColorScheme = 'default' | 'pastel' | 'neon' | 'monochrome' | 'sunset' | 'ocean';
 
@@ -38,6 +39,7 @@ export interface WheelConfig {
 
 export default function Home() {
   const { toast } = useToast();
+  const [spinHistory, setSpinHistory] = useState<SpinHistoryType>([]);
 
   const [config, setConfig] = useState<WheelConfig>({
     slices: 8,
@@ -61,10 +63,9 @@ export default function Home() {
     textFontStyle: Array(8).fill('proportional'),
     textKerning: Array(8).fill(0),
     verticalKerning: Array(8).fill(0),
-    // Initialize hub properties
     hubSize: 50,
     hubImage: null,
-    hubSpinsWithWheel: true, // Default to spinning with wheel
+    hubSpinsWithWheel: true,
   });
 
   const [isSpinning, setIsSpinning] = useState(false);
@@ -96,6 +97,55 @@ export default function Home() {
     }
   };
 
+  const handleSpinComplete = (result: SpinHistoryEntry) => {
+    setIsSpinning(false);
+    setSpinHistory(prev => [result, ...prev]);
+
+    toast({
+      title: "Spin Complete!",
+      description: `Landed on: ${result.sliceLabel}`,
+      duration: 3000,
+    });
+  };
+
+  const handleClearHistory = () => {
+    setSpinHistory([]);
+    toast({
+      title: "History Cleared",
+      description: "Spin history has been cleared.",
+      duration: 3000,
+    });
+  };
+
+  const handleExportHistory = () => {
+    try {
+      const historyData = JSON.stringify(spinHistory, null, 2);
+      const blob = new Blob([historyData], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `wheel-history-${new Date().toISOString()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "History Exported",
+        description: "Spin history has been exported successfully.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Error exporting history:', error);
+      toast({
+        title: "Export Error",
+        description: "Failed to export spin history. Please try again.",
+        variant: "destructive",
+        duration: 5000,
+      });
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-4xl font-bold mb-8 bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -109,7 +159,7 @@ export default function Home() {
               config={config} 
               isSpinning={isSpinning}
               isRecording={isRecording}
-              onSpinComplete={() => setIsSpinning(false)}
+              onSpinComplete={handleSpinComplete}
               onConfigChange={setConfig}
               onRecordingComplete={handleRecordingComplete}
             />
@@ -131,6 +181,9 @@ export default function Home() {
             isRecording={isRecording}
             onStartRecording={() => setIsRecording(true)}
             onStopRecording={() => setIsRecording(false)}
+            spinHistory={spinHistory}
+            onClearHistory={handleClearHistory}
+            onExportHistory={handleExportHistory}
           />
         </div>
       </div>

@@ -18,8 +18,14 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { X } from "lucide-react";
 import type { SpinHistoryEntry } from "../types/SpinHistory";
-import crypto from 'crypto';
 
+// Helper function to generate UUID using Web Crypto API
+function generateUUID(): string {
+  return Array.from(crypto.getRandomValues(new Uint8Array(16)))
+    .map(b => b.toString(16).padStart(2, '0'))
+    .join('')
+    .replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
+}
 
 interface WheelCanvasProps {
   config: WheelConfig;
@@ -51,8 +57,8 @@ export function WheelCanvas({
   const [dialogPosition, setDialogPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
-  const [spinAngle, setSpinAngle] = useState(0);
-  const lastSpinAngleRef = useRef(0);
+  const [spinAngle, setSpinAngle] = useState(config.manualRotation);
+  const lastSpinAngleRef = useRef(config.manualRotation);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -134,7 +140,7 @@ export function WheelCanvas({
 
           // Create spin history entry
           const historyEntry: SpinHistoryEntry = {
-            id: crypto.randomUUID(),
+            id: generateUUID(),
             timestamp: new Date(),
             selectedSlice: selectedSlice ?? 0,
             sliceLabel: config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`,
@@ -146,10 +152,10 @@ export function WheelCanvas({
         }
 
         if (containerRef.current) {
-          const rotation = lastSpinAngleRef.current + spinWheel(elapsed, config);
-          containerRef.current.style.transform = `rotate(${rotation}rad)`;
-          setSpinAngle(rotation);
-          lastSpinAngleRef.current = rotation;
+          const currentRotation = lastSpinAngleRef.current + spinWheel(elapsed, config);
+          containerRef.current.style.transform = `rotate(${currentRotation}rad)`;
+          setSpinAngle(currentRotation);
+          lastSpinAngleRef.current = currentRotation;
         }
 
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
@@ -263,8 +269,9 @@ export function WheelCanvas({
   }, [config, isSpinning, isRecording, onSpinComplete, onRecordingComplete, toast, onConfigChange]);
 
   useEffect(() => {
-    if (!isSpinning && containerRef.current) {
-      containerRef.current.style.transform = `rotate(${config.manualRotation}rad)`;
+    if (!isSpinning) {
+      lastSpinAngleRef.current = config.manualRotation;
+      setSpinAngle(config.manualRotation);
     }
   }, [config.manualRotation, isSpinning]);
 
@@ -334,7 +341,7 @@ export function WheelCanvas({
       <div
         ref={containerRef}
         className="relative transition-transform duration-100 hover:scale-102"
-        style={{ transform: `rotate(${isSpinning ? spinAngle : config.manualRotation}rad)` }}
+        style={{ transform: `rotate(${spinAngle}rad)` }}
       >
         <canvas
           ref={canvasRef}
