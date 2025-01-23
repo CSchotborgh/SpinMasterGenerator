@@ -27,6 +27,18 @@ function generateUUID(): string {
     .replace(/(.{8})(.{4})(.{4})(.{4})(.{12})/, '$1-$2-$3-$4-$5');
 }
 
+// Helper function to get Fibonacci number at position n
+function getFibonacci(n: number): number {
+  if (n <= 1) return 1;
+  let prev = 1, curr = 1;
+  for (let i = 2; i <= n; i++) {
+    const next = prev + curr;
+    prev = curr;
+    curr = next;
+  }
+  return curr;
+}
+
 interface WheelCanvasProps {
   config: WheelConfig;
   isSpinning: boolean;
@@ -123,16 +135,17 @@ export function WheelCanvas({
           spinCountRef.current += 1;
           let baseRotation = spinWheel(config.spinDuration, config);
 
-          // Every other spin (when count is even), force landing on slice 2
-          if (spinCountRef.current % 2 === 0) {
-            const sliceAngle = (2 * Math.PI) / config.slices;
-            // Target slice 2 (index 1)
-            const targetSliceCenter = sliceAngle * 1;
+          // Get target slice from Fibonacci sequence
+          const fibNumber = getFibonacci(spinCountRef.current);
+          // Convert to 0-based index and wrap around the number of slices
+          const targetSlice = (fibNumber - 1) % config.slices;
 
-            const currentAngle = (baseRotation + lastSpinAngleRef.current) % (2 * Math.PI);
-            const adjustment = targetSliceCenter - currentAngle;
-            baseRotation += adjustment;
-          }
+          const sliceAngle = (2 * Math.PI) / config.slices;
+          const targetSliceCenter = sliceAngle * targetSlice;
+
+          const currentAngle = (baseRotation + lastSpinAngleRef.current) % (2 * Math.PI);
+          const adjustment = targetSliceCenter - currentAngle;
+          baseRotation += adjustment;
 
           const finalRotation = lastSpinAngleRef.current + baseRotation;
           lastSpinAngleRef.current = finalRotation;
