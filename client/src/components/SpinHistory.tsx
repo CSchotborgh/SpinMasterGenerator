@@ -52,7 +52,7 @@ export function SpinHistory({ history, onClearHistory, onExportHistory }: SpinHi
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">
-                    Slice #{entry.sliceNumber} (Position {entry.selectedSlice + 1})
+                    Slice {entry.selectedSlice + 1}
                   </span>
                   <span className="text-xs text-muted-foreground">
                     ID: {entry.sliceId.slice(0, 8)}

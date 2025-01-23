@@ -4,8 +4,7 @@ export interface SpinHistoryEntry {
   selectedSlice: number;
   sliceLabel: string;
   rotation: number;
-  sliceId: string;
-  sliceNumber: number; // Add slice number for tracking
+  sliceId: string; // Add unique identifier for each slice
 }
 
 export type SpinHistory = SpinHistoryEntry[];

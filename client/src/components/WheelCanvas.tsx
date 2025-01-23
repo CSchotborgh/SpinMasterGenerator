@@ -73,17 +73,11 @@ export function WheelCanvas({
   const lastSpinAngleRef = useRef(config.manualRotation);
   const spinCountRef = useRef(0);
   const sliceIdsRef = useRef<string[]>([]);
-  const sliceNumbersRef = useRef<number[]>([]);
-  const nextSliceNumberRef = useRef(1);
 
-  // Initialize slice IDs and numbers if not already set
+  // Initialize slice IDs if not already set
   useEffect(() => {
     if (sliceIdsRef.current.length !== config.slices) {
       sliceIdsRef.current = Array(config.slices).fill(null).map(() => generateUUID());
-      sliceNumbersRef.current = Array(config.slices)
-        .fill(null)
-        .map((_, index) => nextSliceNumberRef.current + index);
-      nextSliceNumberRef.current += config.slices;
     }
   }, [config.slices]);
 
@@ -179,22 +173,16 @@ export function WheelCanvas({
             }
           );
 
-          const handleSpinComplete = () => {
-            if (selectedSlice !== null) {
-              const historyEntry: SpinHistoryEntry = {
-                id: generateUUID(),
-                timestamp: new Date(),
-                selectedSlice: selectedSlice,
-                sliceId: sliceIdsRef.current[selectedSlice],
-                sliceLabel: config.sliceLabels[selectedSlice] || `Slice ${selectedSlice + 1}`,
-                rotation: finalRotation,
-                sliceNumber: sliceNumbersRef.current[selectedSlice],
-              };
-
-              onSpinComplete(historyEntry);
-            }
+          const historyEntry: SpinHistoryEntry = {
+            id: generateUUID(),
+            timestamp: new Date(),
+            selectedSlice: selectedSlice ?? 0,
+            sliceId: sliceIdsRef.current[selectedSlice ?? 0],
+            sliceLabel: config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`,
+            rotation: finalRotation,
           };
-          handleSpinComplete();
+
+          onSpinComplete(historyEntry);
           return;
         }
 
@@ -455,16 +443,6 @@ export function WheelCanvas({
               });
             }
           }}
-          onMouseMove={(e) => {
-            if (isDragging) {
-              setDialogPosition({
-                x: e.clientX - dragOffset.x,
-                y: e.clientY - dragOffset.y
-              });
-            }
-          }}
-          onMouseUp={() => setIsDragging(false)}
-          onMouseLeave={() => setIsDragging(false)}
         >
           <DialogHeader className="dialog-header cursor-grab active:cursor-grabbing">
             <DialogTitle>
