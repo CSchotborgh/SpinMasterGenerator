@@ -310,7 +310,7 @@ export function WheelCanvas({
       <div
         ref={containerRef}
         className="relative transition-transform duration-100 hover:scale-102"
-        style={{ transform: `rotate(${config.manualRotation}rad)` }}
+        style={{ transform: `rotate(${isSpinning ? spinAngle : config.manualRotation}rad)` }}
       >
         <canvas
           ref={canvasRef}
