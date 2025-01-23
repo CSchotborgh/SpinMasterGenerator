@@ -121,12 +121,13 @@ export function WheelCanvas({
 
         if (elapsed >= config.spinDuration) {
           spinCountRef.current += 1;
-
           let baseRotation = spinWheel(config.spinDuration, config);
 
-          if (spinCountRef.current % 2 === 1) {
+          // Every other spin (when count is even), force landing on slice 2
+          if (spinCountRef.current % 2 === 0) {
             const sliceAngle = (2 * Math.PI) / config.slices;
-            const targetSliceCenter = sliceAngle * 1; 
+            // Target slice 2 (index 1)
+            const targetSliceCenter = sliceAngle * 1;
 
             const currentAngle = (baseRotation + lastSpinAngleRef.current) % (2 * Math.PI);
             const adjustment = targetSliceCenter - currentAngle;
