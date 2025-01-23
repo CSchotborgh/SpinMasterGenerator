@@ -151,6 +151,11 @@ export function WheelCanvas({
           lastSpinAngleRef.current = finalRotation;
           setSpinAngle(finalRotation);
 
+          onConfigChange({
+            ...config,
+            manualRotation: finalRotation
+          });
+
           const selectedSlice = getSliceAtPoint(
             config.circumference / 2,
             0,
@@ -159,11 +164,6 @@ export function WheelCanvas({
               manualRotation: finalRotation
             }
           );
-
-          onConfigChange({
-            ...config,
-            manualRotation: finalRotation
-          });
 
           const historyEntry: SpinHistoryEntry = {
             id: generateUUID(),
