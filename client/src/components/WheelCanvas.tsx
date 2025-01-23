@@ -178,8 +178,7 @@ export function WheelCanvas({
             timestamp: new Date(),
             selectedSlice: selectedSlice ?? 0,
             sliceId: sliceIdsRef.current[selectedSlice ?? 0],
-            sliceLabel: `${config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`} (${selectedSlice !== null ?
-              `Slice ${selectedSlice + 1} Settings` : 'Unknown Slice'})`,
+            sliceLabel: config.sliceLabels[selectedSlice ?? 0] || `Slice ${(selectedSlice ?? 0) + 1}`,
             rotation: finalRotation,
           };
 
