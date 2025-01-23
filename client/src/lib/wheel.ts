@@ -238,16 +238,22 @@ export function getSliceAtPoint(
 }
 
 export function spinWheel(elapsed: number, config: WheelConfig): number {
-  const { spinSpeed } = config;
+  const { spinSpeed, spinDuration } = config;
 
-  // Simple initial force based on spin speed
-  const force = spinSpeed * 15;
+  // Generate a random target rotation between 2 and 5 full rotations
+  // We do this using a hash of the start time to keep it consistent during the spin
+  const targetRotations = 2 + (Math.sin(elapsed * 7.3) * 0.5 + 0.5) * 3;
+  const targetRotation = targetRotations * 2 * Math.PI;
 
-  // Create momentum that gradually decreases
-  const momentum = Math.max(0, 1 - elapsed / 5);
+  // Calculate how far through the spin we are
+  const progress = Math.min(1, elapsed / spinDuration);
 
-  // Calculate the current rotation based on force and momentum
-  const rotation = force * elapsed * momentum;
+  // Use easing to create a natural spin that slows down
+  // This creates a smooth deceleration curve that feels natural
+  const easeOut = 1 - Math.pow(1 - progress, 3);
+
+  // Combine the target rotation with the easing
+  const rotation = targetRotation * easeOut;
 
   return rotation;
 }
