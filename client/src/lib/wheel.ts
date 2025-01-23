@@ -238,22 +238,16 @@ export function getSliceAtPoint(
 }
 
 export function spinWheel(elapsed: number, config: WheelConfig): number {
-  const { 
-    spinSpeed, 
-    spinDuration,
-    friction,
-    minVelocity
-  } = config;
+  const { spinSpeed } = config;
 
-  // Initial velocity based on spin speed with some randomization
-  const initialVelocity = spinSpeed * 20 * (1 + Math.random() * 0.5);
+  // Simple initial force based on spin speed
+  const force = spinSpeed * 15;
 
-  // Use exponential decay for natural slowdown
-  // This creates a smooth deceleration curve
-  const currentVelocity = initialVelocity * Math.exp(-friction * elapsed);
+  // Create momentum that gradually decreases
+  const momentum = Math.max(0, 1 - elapsed / 5);
 
-  // Calculate position based on velocity decay
-  const position = (initialVelocity * (1 - Math.exp(-friction * elapsed))) / friction;
+  // Calculate the current rotation based on force and momentum
+  const rotation = force * elapsed * momentum;
 
-  return position;
+  return rotation;
 }
