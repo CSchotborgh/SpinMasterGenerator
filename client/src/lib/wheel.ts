@@ -238,16 +238,60 @@ export function getSliceAtPoint(
 }
 
 export function spinWheel(elapsed: number, config: WheelConfig): number {
-  const { spinSpeed } = config;
+  const { spinSpeed, spinDuration, startRamp, endRamp } = config;
 
-  // Simple initial force based on spin speed
-  const force = spinSpeed * 15;
+  // Base force calculation
+  const baseForce = spinSpeed * 20; // Increased multiplier for more dramatic spins
 
-  // Create momentum that gradually decreases
-  const momentum = Math.max(0, 1 - elapsed / 5);
+  // Timing phases
+  const accelerationPhase = startRamp;
+  const steadyPhase = spinDuration - (startRamp + endRamp);
+  const decelerationPhase = endRamp;
 
-  // Calculate the current rotation based on force and momentum
-  const rotation = force * elapsed * momentum;
+  // Calculate current phase
+  let currentPhase: 'acceleration' | 'steady' | 'deceleration';
+  let phaseProgress: number;
+
+  if (elapsed < accelerationPhase) {
+    currentPhase = 'acceleration';
+    phaseProgress = elapsed / accelerationPhase;
+  } else if (elapsed < accelerationPhase + steadyPhase) {
+    currentPhase = 'steady';
+    phaseProgress = (elapsed - accelerationPhase) / steadyPhase;
+  } else {
+    currentPhase = 'deceleration';
+    phaseProgress = (elapsed - (accelerationPhase + steadyPhase)) / decelerationPhase;
+  }
+
+  // Easing functions
+  const easeInQuad = (t: number) => t * t;
+  const easeOutElastic = (t: number) => {
+    const p = 0.3;
+    return Math.pow(2, -10 * t) * Math.sin((t - p / 4) * (2 * Math.PI) / p) + 1;
+  };
+
+  // Calculate force multiplier based on current phase
+  let forceMultiplier = 1;
+  switch (currentPhase) {
+    case 'acceleration':
+      forceMultiplier = easeInQuad(phaseProgress);
+      break;
+    case 'steady':
+      forceMultiplier = 1;
+      break;
+    case 'deceleration':
+      // Add bounce effect during deceleration
+      forceMultiplier = 1 - easeOutElastic(phaseProgress);
+      break;
+  }
+
+  // Apply force variation for more natural spinning
+  const variationAmplitude = 0.1;
+  const variationFrequency = 5;
+  const naturalVariation = 1 + (Math.sin(elapsed * variationFrequency) * variationAmplitude);
+
+  // Calculate final rotation
+  const rotation = baseForce * forceMultiplier * naturalVariation * (elapsed / spinDuration);
 
   return rotation;
 }

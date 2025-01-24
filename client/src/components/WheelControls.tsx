@@ -69,7 +69,7 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
             value={[config.spinSpeed]}
             onValueChange={([v]) => updateConfig("spinSpeed", v)}
             min={1}
-            max={10}
+            max={15}
             step={0.5}
             disabled={disabled}
           />
@@ -80,7 +80,7 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
           <Slider
             value={[config.spinDuration]}
             onValueChange={([v]) => updateConfig("spinDuration", v)}
-            min={1}
+            min={3}
             max={10}
             step={0.5}
             disabled={disabled}
@@ -92,8 +92,8 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
           <Slider
             value={[config.startRamp]}
             onValueChange={([v]) => updateConfig("startRamp", v)}
-            min={0.1}
-            max={2}
+            min={0.2}
+            max={1.5}
             step={0.1}
             disabled={disabled}
           />
@@ -104,7 +104,7 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
           <Slider
             value={[config.endRamp]}
             onValueChange={([v]) => updateConfig("endRamp", v)}
-            min={0.1}
+            min={0.5}
             max={2}
             step={0.1}
             disabled={disabled}
