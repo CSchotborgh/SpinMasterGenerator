@@ -88,10 +88,14 @@ export function WheelCanvas({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    // Calculate the initial offset to center on slices
+    const sliceOffset = Math.PI / config.slices;
+
     canvas.width = config.circumference;
     canvas.height = config.circumference;
 
-    renderWheel(ctx, config, 0);
+    // Add the slice offset to the initial render
+    renderWheel(ctx, config, sliceOffset);
 
     const frameRate = 60;
     const frameInterval = 1000 / frameRate;
@@ -145,11 +149,11 @@ export function WheelCanvas({
 
           // Get target slice from Fibonacci sequence
           const fibNumber = getFibonacci(spinCountRef.current);
-          // Convert to 0-based index and wrap around the number of slices
           const targetSlice = (fibNumber - 1) % config.slices;
 
           const sliceAngle = (2 * Math.PI) / config.slices;
-          const targetSliceCenter = sliceAngle * targetSlice;
+          // Adjust target angle to account for the slice offset
+          const targetSliceCenter = (sliceAngle * targetSlice) + sliceOffset;
 
           const currentAngle = (baseRotation + lastSpinAngleRef.current) % (2 * Math.PI);
           const adjustment = targetSliceCenter - currentAngle;
@@ -164,8 +168,8 @@ export function WheelCanvas({
             manualRotation: finalRotation
           });
 
-          // Calculate the actual landed slice based on final rotation
-          const finalRotationNormalized = finalRotation % (2 * Math.PI);
+          // Calculate the landed slice accounting for the offset
+          const finalRotationNormalized = (finalRotation - sliceOffset) % (2 * Math.PI);
           const landedSliceIndex = Math.floor(((2 * Math.PI - finalRotationNormalized) % (2 * Math.PI)) / sliceAngle);
 
           console.log('Landed slice calculation:', {
@@ -200,10 +204,10 @@ export function WheelCanvas({
         }
 
         if (containerRef.current) {
-          const currentRotation = lastSpinAngleRef.current + spinWheel(elapsed, config);
+          const currentRotation = lastSpinAngleRef.current + spinWheel(elapsed, config) + sliceOffset;
           containerRef.current.style.transform = `rotate(${currentRotation}rad)`;
           setSpinAngle(currentRotation);
-          lastSpinAngleRef.current = currentRotation;
+          lastSpinAngleRef.current = currentRotation - sliceOffset;
         }
 
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
