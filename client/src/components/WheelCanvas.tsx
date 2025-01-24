@@ -88,14 +88,16 @@ export function WheelCanvas({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    // Calculate the initial offset to center on slices
-    const sliceOffset = Math.PI / config.slices;
+    // Calculate size of a single slice in radians
+    const sliceSize = (2 * Math.PI) / config.slices;
+    // Initial offset to center the wheel (half a slice)
+    const initialOffset = -sliceSize / 2;
 
     canvas.width = config.circumference;
     canvas.height = config.circumference;
 
-    // Add the slice offset to the initial render
-    renderWheel(ctx, config, sliceOffset);
+    // Render with the initial offset
+    renderWheel(ctx, config, initialOffset);
 
     const frameRate = 60;
     const frameInterval = 1000 / frameRate;
@@ -151,12 +153,14 @@ export function WheelCanvas({
           const fibNumber = getFibonacci(spinCountRef.current);
           const targetSlice = (fibNumber - 1) % config.slices;
 
-          const sliceAngle = (2 * Math.PI) / config.slices;
-          // Adjust target angle to account for the slice offset
-          const targetSliceCenter = (sliceAngle * targetSlice) + sliceOffset;
+          // Calculate target angle including initial offset
+          const targetAngle = (sliceSize * targetSlice) + initialOffset;
 
-          const currentAngle = (baseRotation + lastSpinAngleRef.current) % (2 * Math.PI);
-          const adjustment = targetSliceCenter - currentAngle;
+          // Adjust current rotation to include initial offset
+          const currentRotation = (baseRotation + lastSpinAngleRef.current) % (2 * Math.PI);
+          const adjustment = targetAngle - currentRotation;
+
+          // Apply the adjustment to ensure we land centered on the target slice
           baseRotation += adjustment;
 
           const finalRotation = lastSpinAngleRef.current + baseRotation;
@@ -168,14 +172,14 @@ export function WheelCanvas({
             manualRotation: finalRotation
           });
 
-          // Calculate the landed slice accounting for the offset
-          const finalRotationNormalized = (finalRotation - sliceOffset) % (2 * Math.PI);
-          const landedSliceIndex = Math.floor(((2 * Math.PI - finalRotationNormalized) % (2 * Math.PI)) / sliceAngle);
+          // Calculate the landed slice index accounting for the offset
+          const normalizedRotation = ((finalRotation - initialOffset) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+          const landedSliceIndex = Math.floor(normalizedRotation / sliceSize);
 
           console.log('Landed slice calculation:', {
             finalRotation,
-            normalizedRotation: finalRotationNormalized,
-            sliceAngle,
+            normalizedRotation,
+            sliceSize,
             landedSliceIndex,
             sliceLabel: config.sliceLabels[landedSliceIndex]
           });
@@ -204,10 +208,11 @@ export function WheelCanvas({
         }
 
         if (containerRef.current) {
-          const currentRotation = lastSpinAngleRef.current + spinWheel(elapsed, config) + sliceOffset;
+          // Include initial offset in the rotation calculation
+          const currentRotation = lastSpinAngleRef.current + spinWheel(elapsed, config) + initialOffset;
           containerRef.current.style.transform = `rotate(${currentRotation}rad)`;
           setSpinAngle(currentRotation);
-          lastSpinAngleRef.current = currentRotation - sliceOffset;
+          lastSpinAngleRef.current = currentRotation - initialOffset;
         }
 
         if (isRecording && currentTime - lastFrameTime >= frameInterval) {
