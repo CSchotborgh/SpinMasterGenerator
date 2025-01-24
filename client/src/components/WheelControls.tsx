@@ -169,7 +169,7 @@ export function WheelControls({ config, onConfigChange, onSpin, disabled, isSpin
         </div>
 
         <div className="space-y-2">
-          <Label>Manual Rotation ({Math.round(config.manualRotation * (180 / Math.PI))}°)</Label>
+          <Label>Manual Rotation ({Math.round((config.manualRotation % (2 * Math.PI)) * (180 / Math.PI))}°)</Label>
           <Slider
             value={[config.manualRotation]}
             onValueChange={([v]) => updateConfig("manualRotation", v)}
