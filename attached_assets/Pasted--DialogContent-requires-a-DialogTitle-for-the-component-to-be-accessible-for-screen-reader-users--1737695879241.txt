@@ -1,0 +1,46 @@
+`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+Landed slice calculation: 
+Object {finalRotation: 26246.959423191525, normalizedRotation: 2.094395102393584, sliceAngle: 1.0471975511965976, landedSliceIndex: 3, sliceLabel: ""}
+Landed slice calculation: 
+Object {finalRotation: 33744.893889759165, normalizedRotation: 4.188790204787111, sliceAngle: 1.0471975511965976, landedSliceIndex: 1, sliceLabel: ""}
+`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+Landed slice calculation: 
+Object {finalRotation: 41243.875553878, normalizedRotation: 1.0471975511983658, sliceAngle: 1.0471975511965976, landedSliceIndex: 4, sliceLabel: ""}
+Landed slice calculation: 
+Object {finalRotation: 48738.66842779205, normalizedRotation: 6.2831853071795365, sliceAngle: 1.0471975511965976, landedSliceIndex: 0, sliceLabel: ""}
+Landed slice calculation: 
+Object {finalRotation: 56236.60289435969, normalizedRotation: 2.0943951023934773, sliceAngle: 1.0471975511965976, landedSliceIndex: 3, sliceLabel: ""}
+`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+`DialogContent` requires a `DialogTitle` for the component to be accessible for screen reader users.
+
+If you want to hide the `DialogTitle`, you can wrap it with our VisuallyHidden component.
+
+For more information, see https://radix-ui.com/primitives/docs/components/dialog
+Warning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
