@@ -249,33 +249,183 @@ npm run type-check
 - Database credentials are automatically injected
 - Check the Replit database tab for connection status
 
+## 📊 Performance & Optimization
+
+### Replit Performance Tips
+- **Memory Usage**: The app is optimized for Replit's memory constraints
+- **Bundle Size**: Code splitting reduces initial load time
+- **Caching**: Static assets are cached for faster loading
+- **Database Queries**: Optimized with proper indexing and connection pooling
+
+### Browser Compatibility
+- **Modern Browsers**: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
+- **Mobile Support**: Responsive design works on iOS and Android
+- **Canvas Rendering**: Hardware-accelerated where available
+- **WebGL Fallback**: Graceful degradation for older devices
+
 ## 📝 API Documentation
 
 ### Configuration Endpoints
-- `GET /api/config` - Retrieve current wheel configuration
-- `POST /api/config` - Save wheel configuration
-- `GET /api/templates` - List saved templates
-- `POST /api/templates` - Create new template
+```typescript
+GET /api/config
+// Retrieve current wheel configuration
+Response: WheelConfig
+
+POST /api/config
+// Save wheel configuration
+Body: WheelConfig
+Response: { success: boolean }
+
+GET /api/templates
+// List saved templates
+Response: Template[]
+
+POST /api/templates
+// Create new template
+Body: { name: string, config: WheelConfig }
+Response: Template
+```
 
 ### History Endpoints
-- `GET /api/history` - Retrieve spin history
-- `POST /api/history` - Add spin result
-- `DELETE /api/history` - Clear history
+```typescript
+GET /api/history
+// Retrieve spin history
+Query: ?limit=50&offset=0
+Response: SpinHistoryEntry[]
+
+POST /api/history
+// Add spin result
+Body: SpinHistoryEntry
+Response: { success: boolean }
+
+DELETE /api/history
+// Clear history
+Response: { success: boolean }
+```
+
+### File Upload Endpoints
+```typescript
+POST /api/upload/config
+// Upload configuration file
+Body: FormData (CSV, TXT, XLS)
+Response: WheelConfig
+
+POST /api/upload/hub-image
+// Upload hub image
+Body: FormData (PNG, JPG, GIF)
+Response: { imageUrl: string }
+```
+
+## 🎨 Customization Examples
+
+### Creating Custom Color Schemes
+```typescript
+// Add to colorSchemes in wheel.ts
+const customScheme = [
+  '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4',
+  '#FFEEAD', '#D4A5A5', '#9B59B6', '#3498DB'
+];
+```
+
+### Custom Physics Settings
+```typescript
+const wheelConfig: WheelConfig = {
+  spinSpeed: 8,        // Higher = faster initial spin
+  spinDuration: 4,     // Seconds for complete spin
+  friction: 2.5,       // Higher = stops sooner
+  velocityVariation: 0.3, // Random variation
+  startRamp: 0.5,      // Acceleration time
+  endRamp: 2.0         // Deceleration time
+};
+```
+
+### Template Configuration
+```typescript
+const template = {
+  name: "Decision Wheel",
+  config: {
+    slices: 6,
+    sliceLabels: ["Yes", "No", "Maybe", "Try Again", "Definitely", "Ask Later"],
+    colorScheme: "pastel",
+    hubSize: 60
+  }
+};
+```
+
+## 🧪 Testing
+
+### Running Tests
+```bash
+# Unit tests
+npm run test
+
+# Type checking
+npm run type-check
+
+# Linting
+npm run lint
+
+# Build verification
+npm run build
+```
+
+### Manual Testing Checklist
+- [ ] Wheel spins smoothly on desktop and mobile
+- [ ] Slice editing works via right-click
+- [ ] Configuration import/export functions correctly
+- [ ] GIF recording completes successfully
+- [ ] Spin history tracks accurately
+- [ ] All accessibility features work with screen readers
+
+## 🔒 Security Considerations
+
+### Data Protection
+- No sensitive data is stored in localStorage
+- File uploads are validated for type and size
+- Database queries use parameterized statements
+- CORS is properly configured for production
+
+### Replit Security
+- Environment variables are automatically secured
+- Database credentials are injected securely
+- HTTPS is enforced in production deployments
+
+## 🌍 Internationalization
+
+The application is ready for internationalization with:
+- Text strings extracted to constants
+- Number and date formatting utilities
+- RTL language support in CSS
+- Accessible labels for screen readers
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature-name`
-3. Make your changes with proper TypeScript types
-4. Test thoroughly on Replit
-5. Submit a pull request
+### Getting Started
+1. Fork the repository on GitHub
+2. Clone to your local Replit workspace
+3. Create a feature branch: `git checkout -b feature-name`
+4. Make your changes with proper TypeScript types
+5. Test thoroughly on Replit
+6. Submit a pull request with detailed description
 
 ### Development Guidelines
-- Follow TypeScript best practices
-- Use Tailwind CSS for styling
-- Ensure accessibility compliance
-- Test on multiple screen sizes
-- Maintain consistent code formatting
+- **TypeScript**: Use strict typing and interfaces
+- **Styling**: Tailwind CSS with semantic class names
+- **Accessibility**: WCAG 2.1 AA compliance required
+- **Testing**: Include unit tests for new features
+- **Documentation**: Update README for significant changes
+- **Code Style**: Use Prettier formatting and ESLint rules
+
+### Code Review Process
+- All PRs require at least one review
+- Automated tests must pass
+- Documentation must be updated
+- Replit deployment must be verified
+
+### Feature Requests
+- Open an issue with detailed description
+- Include use case and mockups if applicable
+- Discuss implementation approach before coding
 
 ## 📄 License
 
@@ -293,4 +443,60 @@ This project is open source and available under the MIT License.
 
 ---
 
+## 📈 Roadmap
+
+### Upcoming Features
+- [ ] **Multiplayer Mode**: Real-time spinning with multiple users
+- [ ] **Sound Effects**: Customizable audio feedback
+- [ ] **Advanced Analytics**: Detailed spin statistics and trends
+- [ ] **Webhook Integration**: Connect to external services
+- [ ] **Mobile App**: Native iOS and Android applications
+- [ ] **3D Wheel**: WebGL-powered 3D rendering option
+
+### Version History
+- **v1.0.0** (Current): Core wheel functionality with Fibonacci landing
+- **v0.9.0**: Added GIF recording and export features
+- **v0.8.0**: Implemented template system and file import/export
+- **v0.7.0**: Added accessibility features and keyboard navigation
+- **v0.6.0**: Custom color schemes and advanced text controls
+
+## 🎯 Use Cases
+
+### Educational
+- **Classroom Activities**: Random student selection, topic choices
+- **Language Learning**: Vocabulary practice, conversation starters
+- **Decision Making**: Group consensus building, option selection
+
+### Business
+- **Team Building**: Icebreakers, activity selection
+- **Marketing**: Prize wheels, customer engagement
+- **Planning**: Feature prioritization, meeting topics
+
+### Entertainment
+- **Game Nights**: Activity selection, team formation
+- **Streaming**: Viewer interaction, content decisions
+- **Events**: Prize drawings, entertainment choices
+
+## 🔗 Related Projects
+
+- [React Wheel of Fortune](https://github.com/example/react-wheel) - Similar concept with different physics
+- [Prize Wheel Generator](https://github.com/example/prize-wheel) - Focus on prize/raffle functionality
+- [Decision Wheel App](https://github.com/example/decision-wheel) - Mobile-first approach
+
+## 📞 Support
+
+### Community
+- **GitHub Issues**: Bug reports and feature requests
+- **Discussions**: Community help and sharing
+- **Replit Community**: Platform-specific support
+
+### Documentation
+- **API Reference**: Complete endpoint documentation
+- **Component Guide**: React component usage examples
+- **Deployment Guide**: Step-by-step setup instructions
+
+---
+
 **Built with ❤️ for Replit** | **React + TypeScript + Express**
+
+*Last updated: January 2025* | *Version 1.0.0*
