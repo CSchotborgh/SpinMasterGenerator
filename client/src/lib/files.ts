@@ -65,9 +65,13 @@ function parseCsv(text: string): WheelConfig {
     spinDuration: parseFloat(values[headers.indexOf('spinDuration')]),
     startRamp: parseFloat(values[headers.indexOf('startRamp')]),
     endRamp: parseFloat(values[headers.indexOf('endRamp')]),
+    friction: parseFloat(values[headers.indexOf('friction')] || '3.5'),
+    velocityVariation: parseFloat(values[headers.indexOf('velocityVariation')] || '0.2'),
+    minVelocity: parseFloat(values[headers.indexOf('minVelocity')] || '0.1'),
     colorScheme: (values[headers.indexOf('colorScheme')] || 'default') as ColorScheme,
     customColors: JSON.parse(values[headers.indexOf('customColors')] || '[]'),
     sliceLabels: JSON.parse(values[headers.indexOf('sliceLabels')] || '[]'),
+    manualRotation: parseFloat(values[headers.indexOf('manualRotation')] || '0'),
     textRotations: JSON.parse(values[headers.indexOf('textRotations')] || '[]'),
     textVertical: JSON.parse(values[headers.indexOf('textVertical')] || '[]'),
     sliceSizes: Array(slices).fill(2 * Math.PI / slices),
@@ -75,6 +79,10 @@ function parseCsv(text: string): WheelConfig {
     textFontStyle: Array(slices).fill('proportional'),
     textKerning: Array(slices).fill(0),
     verticalKerning: Array(slices).fill(0),
+    hubSize: parseFloat(values[headers.indexOf('hubSize')] || '50'),
+    hubImage: values[headers.indexOf('hubImage')] || null,
+    hubSpinsWithWheel: values[headers.indexOf('hubSpinsWithWheel')] === 'true',
+    arrowRadius: parseFloat(values[headers.indexOf('arrowRadius')] || '0'),
   };
 }
 
